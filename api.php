@@ -25,13 +25,15 @@ if (!is_dir($DATA_DIR) && !@mkdir($DATA_DIR, 0750, true)) {
 if (!is_writable($DATA_DIR)) fail(500, "Le dossier de données n'est pas accessible en écriture.");
 $AUDIO_DIR = $DATA_DIR . '/audio';
 if (!is_dir($AUDIO_DIR)) @mkdir($AUDIO_DIR, 0750, true);
-$CONF = $DATA_DIR . '/config.json';
+$CONF = $DATA_DIR . '/config.json'; // ancien mot de passe partagé (v1)
+$USERS = $DATA_DIR . '/users.json';
 $DB = $DATA_DIR . '/db.json';
 
 header('X-Content-Type-Options: nosniff');
 header('Cache-Control: no-store');
 
 $a = $_GET['a'] ?? '';
+$ME = currentUser();
 
 // ---------- lecture audio (GET, avec Range pour iPhone) ----------
 if ($a === 'audio') {
@@ -51,34 +53,97 @@ header('Content-Type: application/json; charset=utf-8');
 // Protection CSRF simple : toutes les requêtes de l'API viennent de notre page.
 if (($_SERVER['HTTP_X_STUDIO'] ?? '') !== '1') fail(403, 'Requête refusée');
 
-$conf = readConf();
-
 switch ($a) {
     case 'status':
+        $u = readUsers();
+        $needsSetup = empty($u['users']);
         out([
-            'setup' => $conf !== null,
-            'auth' => $conf !== null && isAuthed($conf),
+            'needsSetup' => $needsSetup,
+            'legacy' => $needsSetup && readConf() !== null,
+            'user' => $ME ? publicUser($ME) : null,
             'maxUpload' => maxUpload(),
         ]);
 
-    case 'setup': // premier lancement : choisir le mot de passe partagé
-        if ($conf !== null) fail(403, 'Déjà configuré');
+    case 'setup': // premier lancement : création du compte administrateur
+        $u = readUsers();
+        if (!empty($u['users'])) fail(403, 'Déjà configuré');
+        $legacy = readConf();
+        if ($legacy !== null) {
+            usleep(400000);
+            if (!password_verify((string)($_POST['legacy'] ?? ''), $legacy['hash'])) fail(401, 'Ancien mot de passe du studio incorrect.');
+        }
+        $name = clean($_POST['name'] ?? '', 30);
         $pw = (string)($_POST['password'] ?? '');
-        if (mb_strlen($pw) < 6) fail(400, 'Mot de passe trop court (6 caractères minimum).');
-        $conf = ['hash' => password_hash($pw, PASSWORD_DEFAULT), 'secret' => bin2hex(random_bytes(32))];
-        writeJson($CONF, $conf);
-        setAuthCookie($conf);
-        out(['ok' => true]);
+        if ($name === '') fail(400, 'Prénom manquant.');
+        checkPw($pw);
+        $user = ['id' => newId(), 'name' => $name, 'hash' => password_hash($pw, PASSWORD_DEFAULT), 'admin' => true, 'ver' => 1, 'createdAt' => nowMs()];
+        $u = ['secret' => bin2hex(random_bytes(32)), 'users' => [$user]];
+        saveUsers($u);
+        if ($legacy !== null) @unlink($GLOBALS['CONF']);
+        setSession($u, $user);
+        out(['user' => publicUser($user)]);
 
     case 'login':
-        if ($conf === null) fail(400, 'Pas encore configuré');
+        $u = readUsers();
         usleep(400000); // freine les essais en boucle
-        if (!password_verify((string)($_POST['password'] ?? ''), $conf['hash'])) fail(401, 'Mot de passe incorrect.');
-        setAuthCookie($conf);
-        out(['ok' => true]);
+        $user = $u ? findUserByName($u, (string)($_POST['name'] ?? '')) : null;
+        if (!$user || !password_verify((string)($_POST['password'] ?? ''), $user['hash'])) fail(401, 'Prénom ou mot de passe incorrect.');
+        setSession($u, $user);
+        out(['user' => publicUser($user)]);
 
     case 'logout':
         setcookie('studio', '', ['expires' => time() - 3600, 'path' => cookiePath(), 'samesite' => 'Strict', 'secure' => isHttps(), 'httponly' => true]);
+        out(['ok' => true]);
+
+    case 'password': // changer son propre mot de passe
+        requireAuth();
+        $u = readUsers();
+        $i = userIndex($u, $ME['id']);
+        if (!password_verify((string)($_POST['old'] ?? ''), $u['users'][$i]['hash'])) fail(401, 'Mot de passe actuel incorrect.');
+        $pw = (string)($_POST['password'] ?? ''); checkPw($pw);
+        $u['users'][$i]['hash'] = password_hash($pw, PASSWORD_DEFAULT);
+        $u['users'][$i]['ver']++;
+        saveUsers($u);
+        setSession($u, $u['users'][$i]);
+        out(['ok' => true]);
+
+    case 'users':
+        requireAdmin();
+        $u = readUsers();
+        out(['users' => array_map('publicUser', $u['users'])]);
+
+    case 'user_add':
+        requireAdmin();
+        $u = readUsers();
+        $name = clean($_POST['name'] ?? '', 30);
+        $pw = (string)($_POST['password'] ?? '');
+        if ($name === '') fail(400, 'Prénom manquant.');
+        if (findUserByName($u, $name)) fail(400, 'Ce prénom est déjà utilisé.');
+        checkPw($pw);
+        $user = ['id' => newId(), 'name' => $name, 'hash' => password_hash($pw, PASSWORD_DEFAULT), 'admin' => !empty($_POST['admin']) && $_POST['admin'] !== '0', 'ver' => 1, 'createdAt' => nowMs()];
+        $u['users'][] = $user;
+        saveUsers($u);
+        out(['user' => publicUser($user)]);
+
+    case 'user_pw':
+        requireAdmin();
+        $u = readUsers();
+        $i = userIndex($u, (string)($_POST['id'] ?? ''));
+        $pw = (string)($_POST['password'] ?? ''); checkPw($pw);
+        $u['users'][$i]['hash'] = password_hash($pw, PASSWORD_DEFAULT);
+        $u['users'][$i]['ver']++;
+        saveUsers($u);
+        if ($u['users'][$i]['id'] === $ME['id']) setSession($u, $u['users'][$i]);
+        out(['ok' => true]);
+
+    case 'user_del':
+        requireAdmin();
+        $u = readUsers();
+        $id = (string)($_POST['id'] ?? '');
+        if ($id === $ME['id']) fail(400, 'Tu ne peux pas supprimer ton propre compte.');
+        $i = userIndex($u, $id);
+        array_splice($u['users'], $i, 1);
+        saveUsers($u);
         out(['ok' => true]);
 
     case 'state':
@@ -92,7 +157,7 @@ switch ($a) {
         requireAuth();
         $name = clean($_POST['name'] ?? '', 50);
         if ($name === '') fail(400, 'Nom manquant');
-        $p = ['id' => newId(), 'name' => $name, 'author' => author(), 'createdAt' => nowMs()];
+        $p = ['id' => newId(), 'name' => $name, 'author' => author(), 'authorId' => $ME['id'], 'createdAt' => nowMs()];
         mutate(function (&$db) use ($p) { $db['projects'][] = $p; });
         out($p);
 
@@ -126,6 +191,7 @@ switch ($a) {
             'duration' => round(max(0, (float)($_POST['duration'] ?? 0)), 1),
             'peaks' => $peaks,
             'author' => author(),
+            'authorId' => $ME['id'],
             'createdAt' => nowMs(),
         ];
         mutate(function (&$db) use ($t) { $db['tracks'][] = $t; });
@@ -136,7 +202,7 @@ switch ($a) {
         $trackId = (string)($_POST['trackId'] ?? '');
         $text = clean($_POST['text'] ?? '', MAX_COMMENT, true);
         if ($text === '' || !preg_match('/^[a-f0-9]{24}$/', $trackId)) fail(400, 'Commentaire vide');
-        $c = ['id' => newId(), 'trackId' => $trackId, 'text' => $text, 'author' => author(), 'createdAt' => nowMs()];
+        $c = ['id' => newId(), 'trackId' => $trackId, 'text' => $text, 'author' => author(), 'authorId' => $ME['id'], 'createdAt' => nowMs()];
         if (isset($_POST['t']) && $_POST['t'] !== '') $c['t'] = round(max(0, (float)$_POST['t']), 1);
         mutate(function (&$db) use ($c) { $db['comments'][] = $c; });
         out($c);
@@ -147,6 +213,9 @@ switch ($a) {
         $id = (string)($_POST['id'] ?? '');
         if (!in_array($type, ['track', 'comment', 'project'], true) || !preg_match('/^[a-f0-9]{24}$/', $id)) fail(400, 'Requête invalide');
         $files = [];
+        $cur = readDb();
+        $coll = ['track' => 'tracks', 'comment' => 'comments', 'project' => 'projects'][$type];
+        foreach ($cur[$coll] as $item) if ($item['id'] === $id && !canEdit($item)) fail(403, "Tu ne peux supprimer que ce que tu as ajouté.");
         mutate(function (&$db) use ($type, $id, &$files) {
             if ($type === 'comment') {
                 $db['comments'] = array_values(array_filter($db['comments'], function ($c) use ($id) { return $c['id'] !== $id; }));
@@ -183,7 +252,7 @@ function clean($s, $max, $multiline = false) {
     $s = $multiline ? preg_replace('/[^\P{C}\n]/u', '', $s) : preg_replace('/\p{C}/u', '', $s);
     return mb_substr((string)$s, 0, $max);
 }
-function author() { return clean($_POST['author'] ?? '', 30) ?: 'Quelqu\'un'; }
+function author() { global $ME; return $ME['name']; }
 
 function readJson($path) {
     if (!is_file($path)) return null;
@@ -216,15 +285,44 @@ function isHttps() {
         || (($_SERVER['SERVER_PORT'] ?? '') == 443);
 }
 function cookiePath() { $d = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/'), '/'); return $d === '' ? '/' : $d . '/'; }
-function token($conf) { return hash_hmac('sha256', 'studio-v1', $conf['secret']); }
-function setAuthCookie($conf) {
-    setcookie('studio', token($conf), [
+
+function readUsers() { global $USERS; return readJson($USERS); }
+function saveUsers($u) { global $USERS; writeJson($USERS, $u); }
+function publicUser($x) { return ['id' => $x['id'], 'name' => $x['name'], 'admin' => !empty($x['admin']), 'createdAt' => $x['createdAt'] ?? 0]; }
+function findUserByName($u, $name) {
+    $name = mb_strtolower(trim($name));
+    foreach ($u['users'] ?? [] as $x) if (mb_strtolower($x['name']) === $name) return $x;
+    return null;
+}
+function userIndex($u, $id) {
+    foreach ($u['users'] ?? [] as $i => $x) if ($x['id'] === $id) return $i;
+    fail(404, 'Compte introuvable.');
+}
+function checkPw($pw) { if (mb_strlen($pw) < 6) fail(400, 'Mot de passe trop court (6 caractères minimum).'); }
+function sessionMac($u, $user) { return hash_hmac('sha256', $user['id'] . '|' . $user['ver'], $u['secret']); }
+function setSession($u, $user) {
+    setcookie('studio', $user['id'] . '.' . $user['ver'] . '.' . sessionMac($u, $user), [
         'expires' => time() + 365 * 86400, 'path' => cookiePath(),
         'secure' => isHttps(), 'httponly' => true, 'samesite' => 'Strict',
     ]);
 }
-function isAuthed($conf) { return isset($_COOKIE['studio']) && hash_equals(token($conf), (string)$_COOKIE['studio']); }
-function requireAuth() { $c = readConf(); if ($c === null || !isAuthed($c)) fail(401, 'Non connecté'); }
+function currentUser() {
+    $c = (string)($_COOKIE['studio'] ?? '');
+    if (!preg_match('/^([a-f0-9]{24})\.(\d+)\.([a-f0-9]{64})$/', $c, $m)) return null;
+    $u = readUsers(); if (!$u) return null;
+    foreach ($u['users'] as $x) {
+        if ($x['id'] === $m[1] && (string)$x['ver'] === $m[2] && hash_equals(sessionMac($u, $x), $m[3])) return $x;
+    }
+    return null;
+}
+function requireAuth() { global $ME; if (!$ME) fail(401, 'Non connecté'); }
+function requireAdmin() { global $ME; requireAuth(); if (empty($ME['admin'])) fail(403, 'Réservé aux administrateurs.'); }
+function canEdit($item) {
+    global $ME;
+    if (!empty($ME['admin'])) return true;
+    if (!empty($item['authorId'])) return $item['authorId'] === $ME['id'];
+    return mb_strtolower($item['author'] ?? '') === mb_strtolower($ME['name']); // anciens éléments sans compte
+}
 
 function iniBytes($v) {
     $v = trim((string)$v); if ($v === '') return 0;

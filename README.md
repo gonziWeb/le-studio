@@ -13,7 +13,7 @@ PHP 7.4+ et c'est tout : pas de base de données, pas de dépendance.
    - Branche : `main`
    - Copie la **clé SSH** affichée par OVH → GitHub → *Settings* → *SSH and GPG keys* → *New SSH key*.
    - Copie l'**URL de webhook** → dépôt GitHub → *Settings* → *Webhooks* → *Add webhook* (Content type : `application/json`). Chaque `git push` mettra le site à jour.
-4. Ouvre le site **tout de suite** : la première personne qui l'ouvre choisit le mot de passe partagé. Donne ensuite ce mot de passe à l'autre.
+4. Ouvre le site **tout de suite** : la première personne qui l'ouvre crée le compte **administrateur**. Ensuite, l'admin crée les autres comptes (menu avec ton prénom, en haut à droite > « Gérer les comptes »).
 5. Le site redirige automatiquement vers `https://` (règle dans `.htaccess`).
 
 ## Où sont les données ?
@@ -23,7 +23,12 @@ Si ce dossier ne peut pas être créé, l'appli se rabat sur `data/` dans le dos
 
 Pour faire une sauvegarde : récupère `le-studio-data/` par FTP.
 
-Pour changer le mot de passe : supprime `le-studio-data/config.json` par FTP puis ouvre le site (il redemandera un mot de passe ; les morceaux sont conservés).
+## Comptes
+
+- L'administrateur ajoute, supprime des comptes et change leurs mots de passe.
+- Chacun peut changer son propre mot de passe (menu avec son prénom).
+- Chacun peut supprimer ses morceaux et commentaires ; l'admin peut tout supprimer.
+- Mot de passe admin perdu : supprime `le-studio-data/users.json` par FTP puis ouvre le site pour recréer le compte admin (les morceaux sont conservés, les comptes sont à recréer).
 
 ## Taille des fichiers
 

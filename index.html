@@ -101,7 +101,18 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
 .gate h1{margin-bottom:10px}
 .gate p{color:var(--mute);margin:0 0 20px}
 .gate input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px;font-size:16px;margin-bottom:12px;text-align:center}
-.gate .btn{width:100%}
+.gate .btn{width:100%;margin-top:6px}
+.gate form{text-align:left}
+.glab{display:block;font-size:13px;color:var(--mute);margin:0 0 6px 2px}
+.gate input{text-align:left}
+.ulist{margin:0 0 6px}
+.urow{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.urow .n{flex:1;font-weight:600}
+.urow .n small{color:var(--mute);font-weight:400;margin-left:6px}
+.urow button{color:var(--mute);font-size:13px;padding:6px 8px;border-radius:8px;border:1px solid var(--line)}
+.chk{display:flex;align-items:center;gap:8px;margin-top:12px;color:var(--mute);font-size:14px}
+.chk input{width:18px;height:18px;accent-color:var(--amber)}
+.menu button.btn{width:100%;margin-top:10px}
 .recbox{margin-top:12px;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;display:none}
 .recdot{width:64px;height:64px;border-radius:50%;background:var(--amber);margin:0 auto 10px;display:grid;place-items:center;color:#fff}
 .recdot.live{animation:pulse 1.2s infinite}
@@ -136,8 +147,10 @@ body.has-player{padding-bottom:calc(170px + env(safe-area-inset-bottom))}
   <h1>Le <span>Studio</span></h1>
   <p id="gateMsg"></p>
   <form id="gateForm">
-    <input id="gateIn" type="password" autocomplete="current-password">
-    <button class="btn pri" id="gateGo" type="submit">Entrer</button>
+    <label class="glab" for="gName">Prénom</label><input id="gName" type="text" autocomplete="username" autocapitalize="words">
+    <label class="glab" for="gPw">Mot de passe</label><input id="gPw" type="password" autocomplete="current-password">
+    <div id="gLegacyWrap" style="display:none"><label class="glab" for="gLegacy">Ancien mot de passe commun du studio</label><input id="gLegacy" type="password" autocomplete="off"></div>
+    <button class="btn pri" id="gateGo" type="submit">Se connecter</button>
   </form>
   <div class="err" id="gateErr"></div>
 </div>
@@ -223,7 +236,7 @@ async function api(action, data, opts){
   opts = opts || {};
   const url = "api.php?a=" + action + (opts.query || "");
   let body;
-  if (data) { body = new FormData(); for (const k in data) if (data[k] != null) body.append(k, data[k]); if (myName) body.append("author", myName); }
+  if (data) { body = new FormData(); for (const k in data) if (data[k] != null) body.append(k, data[k]); }
   const r = await fetch(url, { method: data ? "POST" : "GET", body, headers: { "X-Studio": "1" }, credentials: "same-origin" });
   let j = null; try { j = await r.json(); } catch(e){}
   if (!r.ok) { const e = new Error((j && j.error) || ("Erreur " + r.status)); e.status = r.status; throw e; }
@@ -240,7 +253,7 @@ function uploadXhr(fd, onProgress){
 }
 
 // ---------- state ----------
-let myName = store.get("studio.name") || "";
+let me = null;
 let projects = [], tracks = [], comments = [], rev = -1, maxUpload = 0, loaded = false;
 let filter = store.get("studio.filter") || "all";
 const expanded = new Set();
@@ -253,57 +266,101 @@ let curId = null;
 const PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
 const PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="5.5" y="4" width="4.5" height="16" rx="1"/><rect x="14" y="4" width="4.5" height="16" rx="1"/></svg>';
 
-// ---------- boot / gate ----------
+// ---------- boot / connexion ----------
 let gateMode = null;
 async function boot(){
   let st;
   try { st = await api("status"); } catch(e){ showGate("error", e.message); return; }
   maxUpload = st.maxUpload || 0;
-  if (!st.setup) return showGate("setup");
-  if (!st.auth) return showGate("login");
-  if (!myName) return showGate("name");
-  startApp();
+  if (st.needsSetup) return showGate("setup", null, st.legacy);
+  if (!st.user) return showGate("login");
+  me = st.user; startApp();
 }
-function showGate(mode, msg){
+function showGate(mode, msg, legacy){
   gateMode = mode; $("app").style.display = "none"; $("gate").style.display = "block"; $("gateErr").textContent = "";
-  const inp = $("gateIn"); inp.value = "";
-  if (mode === "setup") { $("gateMsg").textContent = "Choisissez un mot de passe commun (6 caractères minimum)."; inp.type = "password"; inp.placeholder = ""; inp.autocomplete = "new-password"; $("gateGo").textContent = "Valider"; }
-  else if (mode === "login") { $("gateMsg").textContent = "Mot de passe"; inp.type = "password"; inp.placeholder = ""; inp.autocomplete = "current-password"; $("gateGo").textContent = "Entrer"; }
-  else if (mode === "name") { $("gateMsg").textContent = "Ton prénom"; inp.type = "text"; inp.placeholder = ""; inp.autocomplete = "given-name"; inp.value = myName; $("gateGo").textContent = "Valider"; }
+  $("gPw").value = ""; $("gLegacy").value = "";
+  $("gLegacyWrap").style.display = mode === "setup" && legacy ? "block" : "none";
+  if (mode === "setup") { $("gateMsg").textContent = "Crée ton compte administrateur."; $("gPw").autocomplete = "new-password"; $("gateGo").textContent = "Créer le compte"; }
+  else if (mode === "login") { $("gateMsg").textContent = ""; $("gPw").autocomplete = "current-password"; $("gateGo").textContent = "Se connecter"; }
   else { $("gateMsg").textContent = msg || "Le serveur ne répond pas."; $("gateForm").style.display = "none"; return; }
   $("gateForm").style.display = "block";
-  setTimeout(() => inp.focus(), 50);
+  setTimeout(() => ($("gName").value ? $("gPw") : $("gName")).focus(), 50);
 }
 $("gateForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const v = $("gateIn").value.trim(); if (!v) return;
+  const name = $("gName").value.trim(), password = $("gPw").value;
+  if (!name || !password) return;
   $("gateGo").disabled = true; $("gateErr").textContent = "";
   try {
-    if (gateMode === "setup") { await api("setup", { password: v }); }
-    else if (gateMode === "login") { await api("login", { password: v }); }
-    else if (gateMode === "name") { myName = v.slice(0, 30); store.set("studio.name", myName); }
-    $("gateGo").disabled = false;
-    if (!myName) return showGate("name");
-    startApp();
+    const r = gateMode === "setup"
+      ? await api("setup", { name, password, legacy: $("gLegacyWrap").style.display === "block" ? $("gLegacy").value : null })
+      : await api("login", { name, password });
+    me = r.user; $("gateGo").disabled = false; startApp();
   } catch(err){ $("gateGo").disabled = false; $("gateErr").textContent = err.message; }
 });
 
 let started = false;
 function startApp(){
   $("gate").style.display = "none"; $("app").style.display = "block";
-  $("whoBtn").textContent = myName;
-  if (started) return; started = true;
+  $("whoBtn").textContent = me.name;
+  if (started) { rev = -1; refresh(); return; } started = true;
   refresh();
-  setInterval(() => { if (!document.hidden) refresh(); }, 8000);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+  setInterval(() => { if (!document.hidden && me) refresh(); }, 8000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && me) refresh(); });
 }
+
+// ---------- compte ----------
+const pwField = (label, auto) => { const w = el("div","field"); const l = el("label",null,label); const i = document.createElement("input"); i.type = "password"; i.autocomplete = auto || "new-password"; w.append(l, i); return [w, i]; };
+const textField = (label) => { const w = el("div","field"); const l = el("label",null,label); const i = document.createElement("input"); i.maxLength = 30; w.append(l, i); return [w, i]; };
 $("whoBtn").onclick = () => {
-  const wrap = el("div","field"); const inp = document.createElement("input"); inp.value = myName; inp.maxLength = 30; wrap.append(inp);
-  const out = el("button","btn","Se déconnecter"); out.style.marginTop = "12px"; out.style.width = "100%";
-  out.onclick = async () => { await api("logout", {}).catch(()=>{}); closeDlg(); showGate("login"); };
-  const box = el("div"); box.append(wrap, out);
-  openDlg("Ton nom", box, "Enregistrer", () => { const v = inp.value.trim(); if (!v) return false; myName = v; store.set("studio.name", v); $("whoBtn").textContent = v; render(); });
+  const box = el("div","menu");
+  const b1 = el("button","btn","Changer mon mot de passe"); b1.onclick = changeMyPw; box.append(b1);
+  if (me.admin) { const b2 = el("button","btn","Gérer les comptes"); b2.onclick = manageUsers; box.append(b2); }
+  const b3 = el("button","btn","Se déconnecter"); b3.onclick = async () => { await api("logout", {}).catch(()=>{}); me = null; audio.pause(); closeDlg(); $("gName").value = ""; showGate("login"); }; box.append(b3);
+  openDlg(me.name + (me.admin ? " · admin" : ""), box, "Fermer", () => {});
+  $("dlgNo").style.display = "none";
 };
+function changeMyPw(){
+  const [w1, oldI] = pwField("Mot de passe actuel", "current-password"); const [w2, newI] = pwField("Nouveau mot de passe");
+  const box = el("div"); box.append(w1, w2);
+  openDlg("Changer mon mot de passe", box, "Enregistrer", async () => {
+    try { await api("password", { old: oldI.value, password: newI.value }); toast("Mot de passe modifié"); }
+    catch(e){ toast(e.message); return false; }
+  });
+}
+async function manageUsers(){
+  const box = el("div"); const list = el("div","ulist"); box.append(list);
+  const draw = async () => {
+    list.innerHTML = "";
+    let r; try { r = await api("users"); } catch(e){ list.append(el("p","err",e.message)); return; }
+    r.users.forEach(u => {
+      const row = el("div","urow"); const n = el("div","n", u.name); if (u.admin) n.append(el("small",null,"admin")); row.append(n);
+      const pw = el("button",null,"Mot de passe"); pw.onclick = () => resetPw(u); row.append(pw);
+      if (u.id !== me.id) { const del = el("button",null,"Supprimer"); del.onclick = () => openDlg("Supprimer le compte de " + u.name + " ?", el("p","hint","Ses morceaux et commentaires restent."), "Supprimer", async () => { try { await api("user_del", { id: u.id }); toast("Compte supprimé"); setTimeout(manageUsers, 0); } catch(e){ toast(e.message); return false; } }); row.append(del); }
+      list.append(row);
+    });
+  };
+  const add = el("button","btn","Ajouter un compte"); add.style.width = "100%"; add.style.marginTop = "12px"; add.onclick = addUser; box.append(add);
+  openDlg("Comptes", box, "Fermer", () => {}); $("dlgNo").style.display = "none";
+  draw();
+}
+function addUser(){
+  const [w1, nameI] = textField("Prénom"); const [w2, pwI] = pwField("Mot de passe");
+  const chk = el("label","chk"); const cb = document.createElement("input"); cb.type = "checkbox"; chk.append(cb, document.createTextNode("Administrateur"));
+  const box = el("div"); box.append(w1, w2, chk);
+  openDlg("Nouveau compte", box, "Créer", async () => {
+    try { await api("user_add", { name: nameI.value.trim(), password: pwI.value, admin: cb.checked ? "1" : "0" }); toast("Compte créé"); setTimeout(manageUsers, 0); }
+    catch(e){ toast(e.message); return false; }
+  });
+  setTimeout(() => nameI.focus(), 50);
+}
+function resetPw(u){
+  const [w, pwI] = pwField("Nouveau mot de passe pour " + u.name);
+  openDlg("Mot de passe", w, "Enregistrer", async () => {
+    try { await api("user_pw", { id: u.id, password: pwI.value }); toast("Mot de passe modifié"); setTimeout(manageUsers, 0); }
+    catch(e){ toast(e.message); return false; }
+  });
+}
 
 let refreshing = false;
 async function refresh(){
@@ -312,14 +369,15 @@ async function refresh(){
     const s = await api("state", null, { query: "&since=" + rev });
     if (!s.same) { projects = s.projects || []; tracks = (s.tracks || []).slice().sort((a,b) => b.createdAt - a.createdAt); comments = s.comments || []; rev = s.rev; loaded = true; render(); }
   } catch(e){
-    if (e.status === 401) showGate("login");
+    if (e.status === 401) { me = null; showGate("login"); }
     else if (!loaded) { $("feed").innerHTML = ""; $("feed").append(el("div","status","Impossible de charger les morceaux. Vérifie ta connexion.")); }
   } finally { refreshing = false; }
 }
 
 // ---------- render ----------
-const isMine = a => a && myName && a.toLowerCase() === myName.toLowerCase();
-const nameOf = a => isMine(a) ? "Toi" : (a || "Quelqu'un");
+const isMine = x => !!me && (x.authorId ? x.authorId === me.id : (x.author || "").toLowerCase() === me.name.toLowerCase());
+const canDel = x => isMine(x) || (me && me.admin);
+const nameOf = x => isMine(x) ? "Toi" : (x.author || "Quelqu'un");
 
 function render(){
   if (!loaded) return;
@@ -353,7 +411,7 @@ function renderChips(){
   const a = el("button","chip add","＋ Projet"); a.onclick = newProject; c.append(a);
 }
 function projectMenu(id){
-  const p = projects.find(x => x.id === id); if (!p) return;
+  const p = projects.find(x => x.id === id); if (!p || !canDel(p)) return;
   openDlg("Supprimer le projet « " + p.name + " » ?", el("p","hint","Les morceaux restent, ils sont juste retirés du projet."), "Supprimer", async () => {
     try { await api("delete", { type: "project", id }); await refresh(); } catch(e){ toast(e.message); return false; }
   });
@@ -367,9 +425,9 @@ function card(t, cms){
   const meta = el("div","meta");
   meta.append(el("div","title", t.title || "Sans titre"));
   const by = el("div","by");
-  by.append(el("span",null, nameOf(t.author) + " · " + ago(t.createdAt)));
+  by.append(el("span",null, nameOf(t) + " · " + ago(t.createdAt)));
   const p = projects.find(x => x.id === t.projectId); if (p) by.append(el("span","tag", p.name));
-  if (lastSeen && t.createdAt > lastSeen && !isMine(t.author)) by.append(el("span","new","Nouveau"));
+  if (lastSeen && t.createdAt > lastSeen && !isMine(t)) by.append(el("span","new","Nouveau"));
   meta.append(by);
   top.append(pb, meta); d.append(top);
   if (t.note) d.append(el("p","note", t.note));
@@ -392,7 +450,7 @@ function card(t, cms){
   const cb = el("button",null, (cms.length ? cms.length + " commentaire" + (cms.length>1?"s":"") : "Commenter"));
   cb.onclick = () => { expanded.has(t.id) ? expanded.delete(t.id) : expanded.add(t.id); render(); };
   f.append(cb, el("span","sp"));
-  if (isMine(t.author)) { const del = el("button",null,"Supprimer"); del.onclick = () => deleteTrack(t); f.append(del); }
+  if (canDel(t)) { const del = el("button",null,"Supprimer"); del.onclick = () => deleteTrack(t); f.append(del); }
   d.append(f);
   if (expanded.has(t.id)) d.append(commentsBlock(t, cms));
   return d;
@@ -403,9 +461,9 @@ function commentsBlock(t, cms){
   cms.forEach(c => {
     const r = el("div","cm");
     if (typeof c.t === "number") { const ts = el("button","ts", fmt(c.t)); ts.onclick = () => playAt(t, c.t); r.append(ts); }
-    const body = el("div"); const h = el("div"); h.append(el("span","who", nameOf(c.author)), document.createTextNode(" "), el("span","when", ago(c.createdAt)));
+    const body = el("div"); const h = el("div"); h.append(el("span","who", nameOf(c)), document.createTextNode(" "), el("span","when", ago(c.createdAt)));
     body.append(h, el("div","txt", c.text || "")); r.append(body);
-    if (isMine(c.author)) { const x = el("button","x","✕"); x.setAttribute("aria-label","Supprimer le commentaire"); x.onclick = () => askConfirm("Supprimer ce commentaire ?", async () => { try { await api("delete", { type: "comment", id: c.id }); await refresh(); } catch(e){ toast(e.message); return false; } }); r.append(x); }
+    if (canDel(c)) { const x = el("button","x","✕"); x.setAttribute("aria-label","Supprimer le commentaire"); x.onclick = () => askConfirm("Supprimer ce commentaire ?", async () => { try { await api("delete", { type: "comment", id: c.id }); await refresh(); } catch(e){ toast(e.message); return false; } }); r.append(x); }
     box.append(r);
   });
   const row = el("div","cbox");
@@ -466,7 +524,7 @@ function updPlayer(){
   $("pPlay").innerHTML = audio.paused ? PLAY : PAUSE;
   $("pTitle").textContent = t.title || "Sans titre";
   const d = t.duration || audio.duration;
-  $("pTime").textContent = fmt(audio.currentTime) + (d ? " / " + fmt(d) : "") + " · " + nameOf(t.author);
+  $("pTime").textContent = fmt(audio.currentTime) + (d ? " / " + fmt(d) : "") + " · " + nameOf(t);
 }
 ["play","pause","ended","loadedmetadata"].forEach(ev => audio.addEventListener(ev, updPlayer));
 ["play","pause","ended"].forEach(ev => audio.addEventListener(ev, () => { document.querySelectorAll(".card").forEach(c => { const on = c.dataset.id === curId; c.classList.toggle("playing", on); const b = c.querySelector(".play"); if (b) b.innerHTML = on && !audio.paused ? PAUSE : PLAY; }); }));
@@ -490,7 +548,7 @@ function deleteTrack(t){
 let dlgYes = null;
 function openDlg(title, bodyEl, yesLabel, onYes){
   $("dlgTitle").textContent = title; const b = $("dlgBody"); b.innerHTML = ""; if (bodyEl) b.append(bodyEl);
-  $("dlgYes").textContent = yesLabel || "OK"; dlgYes = onYes; $("dlgBg").classList.add("open");
+  $("dlgYes").textContent = yesLabel || "OK"; dlgYes = onYes; $("dlgNo").style.display = ""; $("dlgBg").classList.add("open");
 }
 function closeDlg(){ $("dlgBg").classList.remove("open"); dlgYes = null; }
 $("dlgNo").onclick = closeDlg;
@@ -610,7 +668,6 @@ $("upGo").onclick = async () => {
     fd.append("projectId", $("tProj").value);
     fd.append("duration", String(info.duration || 0));
     fd.append("peaks", JSON.stringify(info.peaks || []));
-    fd.append("author", myName);
     await uploadXhr(fd, p => setProg(0.05 + p * 0.93, "Envoi… " + Math.round(p * 100) + " %"));
     setProg(1, "Envoyé !");
     busy = false; $("upCancel").disabled = false; closeUpload(); toast("Envoyé");
