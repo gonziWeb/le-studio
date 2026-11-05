@@ -14,7 +14,7 @@ PHP 7.4+ et c'est tout : pas de base de données, pas de dépendance.
    - Copie la **clé SSH** affichée par OVH → GitHub → *Settings* → *SSH and GPG keys* → *New SSH key*.
    - Copie l'**URL de webhook** → dépôt GitHub → *Settings* → *Webhooks* → *Add webhook* (Content type : `application/json`). Chaque `git push` mettra le site à jour.
 4. Ouvre le site **tout de suite** : la première personne qui l'ouvre choisit le mot de passe partagé. Donne ensuite ce mot de passe à l'autre.
-5. Une fois le https actif, tu peux décommenter le bloc « Forcer le https » dans `.htaccess`.
+5. Le site redirige automatiquement vers `https://` (règle dans `.htaccess`).
 
 ## Où sont les données ?
 
