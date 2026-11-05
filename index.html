@@ -126,6 +126,9 @@ body.has-player{padding-bottom:calc(170px + env(safe-area-inset-bottom))}
 .vol svg{width:20px;height:20px}
 .vol input{width:110px;accent-color:var(--amber)}
 @media (min-width:700px){.player{padding-left:calc(50% - 320px);padding-right:calc(50% - 320px)}.vol input{width:160px}}
+.drop{position:fixed;inset:0;z-index:30;background:rgba(11,11,11,.85);display:none;align-items:center;justify-content:center;pointer-events:none}
+.drop.on{display:flex}
+.drop div{border:2px dashed var(--amber);color:var(--amber);border-radius:22px;padding:48px 40px;font-size:20px;font-weight:600;margin:24px;text-align:center}
 </style>
 </head>
 <body>
@@ -191,6 +194,7 @@ body.has-player{padding-bottom:calc(170px + env(safe-area-inset-bottom))}
   <div class="pmeta"><div class="ptitle" id="pTitle"></div><div class="ptime" id="pTime"></div></div>
   <div class="vol" id="volWrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg><input type="range" id="vol" min="0" max="1" step="0.01" aria-label="Volume"></div>
 </div>
+<div class="drop" id="drop"><div>Dépose le fichier ici</div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -616,6 +620,23 @@ $("upGo").onclick = async () => {
     busy = false; $("upGo").disabled = false; $("upCancel").disabled = false;
   }
 };
+
+// ---------- glisser-déposer (ordinateur) ----------
+let dragDepth = 0;
+const hasFiles = e => e.dataTransfer && Array.from(e.dataTransfer.types || []).includes("Files");
+const appOpen = () => $("app").style.display !== "none" && !busy;
+window.addEventListener("dragenter", e => { if (!hasFiles(e) || !appOpen()) return; e.preventDefault(); dragDepth++; $("drop").classList.add("on"); });
+window.addEventListener("dragover", e => { if (!hasFiles(e)) return; e.preventDefault(); e.dataTransfer.dropEffect = appOpen() ? "copy" : "none"; });
+window.addEventListener("dragleave", e => { if (!hasFiles(e)) return; dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) $("drop").classList.remove("on"); });
+window.addEventListener("drop", e => {
+  if (!hasFiles(e)) return; e.preventDefault(); dragDepth = 0; $("drop").classList.remove("on");
+  if (!appOpen()) return;
+  const f = e.dataTransfer.files && e.dataTransfer.files[0]; if (!f) return;
+  if (!/^(audio|video)\//.test(f.type) && !/\.(m4a|mp3|wav|aac|ogg|oga|opus|webm|flac|caf|mov|3gp|amr|mp4)$/i.test(f.name)) { toast("Ce fichier n'est pas un fichier audio."); return; }
+  if (!$("upBg").classList.contains("open")) openUpload();
+  stopRec(true); $("recBox").style.display = "none";
+  setChosen(f, f.name.replace(/\.[^.]+$/, ""), true);
+});
 
 boot();
 })();
