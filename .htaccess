@@ -1,0 +1,12 @@
+# Le Studio
+Options -Indexes
+DirectoryIndex index.html
+
+# Forcer le https (nécessaire pour le micro) — décommente une fois le certificat SSL actif
+# RewriteEngine On
+# RewriteCond %{HTTPS} off
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Interdire l'accès direct au dossier de secours des données et aux fichiers cachés
+RedirectMatch 404 ^/(.*/)?data(/|$)
+RedirectMatch 404 /\.(git|user\.ini|ovhconfig)

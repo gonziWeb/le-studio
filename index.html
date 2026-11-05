@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0b">
+<meta name="robots" content="noindex, nofollow">
+<title>Le Studio</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b0b0b'/%3E%3Cpath d='M7 18v-4M11 22V10M15 25V7M19 21v-10M23 18v-4' stroke='%2334d17a' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;
+  --bg:#0b0b0b; --panel:#171717; --panel2:#222222; --line:#2c2c2c;
+  --ink:#f2f2f2; --mute:#a3a3a3; --dim:#6b6b6b;
+  --amber:#34d17a; --amber2:#7fe6ab; --rose:#ff5d5d; --teal:#8ec5ff;
+  --r:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,sans-serif}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(96px + env(safe-area-inset-bottom)) env(safe-area-inset-left)}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input,textarea,select{font:inherit;color:var(--ink)}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+header{padding:22px 0 8px}
+h1{font-family:Inter,system-ui,sans-serif;font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0;line-height:1}
+h1 span{color:var(--amber)}
+.sub{color:var(--mute);font-size:13px;margin-top:6px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:14px 0 6px;scrollbar-width:none;margin:0 -16px;padding-left:16px;padding-right:16px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:8px 14px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--mute);font-weight:500;font-size:14px;white-space:nowrap}
+.chip.on{background:var(--amber);border-color:var(--amber);color:#04140a}
+.chip.add{border-style:dashed}
+.status{color:var(--mute);text-align:center;padding:40px 10px}
+.empty{text-align:center;padding:48px 16px;color:var(--mute)}
+.empty b{display:block;font-family:Inter,system-ui,sans-serif;font-weight:800;font-size:22px;color:var(--ink);margin-bottom:6px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:12px 0;position:relative}
+.card.playing{border-color:#1f6b41;box-shadow:0 0 0 1px #1f6b41 inset}
+.top{display:flex;gap:12px;align-items:center}
+.play{flex:none;width:48px;height:48px;border-radius:50%;background:var(--amber);color:#04140a;display:grid;place-items:center}
+.play svg{width:20px;height:20px}
+.meta{min-width:0;flex:1}
+.title{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.by{color:var(--mute);font-size:13px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.tag{background:var(--panel2);border-radius:6px;padding:1px 7px;font-size:12px;color:var(--amber2)}
+.new{background:var(--rose);color:#fff;border-radius:6px;padding:1px 6px;font-size:11px;font-weight:600}
+.note{color:#d4d4d4;font-size:14px;margin:10px 0 0;white-space:pre-wrap;word-wrap:break-word}
+.wave{position:relative;margin-top:12px;height:56px;touch-action:none}
+.wave canvas{width:100%;height:56px;display:block}
+.marks{position:absolute;left:0;right:0;top:-4px;height:0}
+.mark{position:absolute;top:0;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--teal);border:2px solid var(--panel)}
+.times{display:flex;justify-content:space-between;color:var(--dim);font-size:12px;margin-top:4px;font-variant-numeric:tabular-nums}
+.foot{display:flex;gap:6px;margin-top:8px;align-items:center}
+.foot button{color:var(--mute);font-size:13px;padding:6px 8px;border-radius:8px;display:flex;gap:6px;align-items:center}
+.foot button:active{background:var(--panel2)}
+.foot .sp{flex:1}
+.comments{border-top:1px solid var(--line);margin-top:8px;padding-top:10px}
+.cm{display:flex;gap:8px;padding:6px 0;align-items:flex-start}
+.cm .who{font-weight:600;font-size:13px}
+.cm .txt{font-size:14px;white-space:pre-wrap;word-wrap:break-word}
+.cm .when{color:var(--dim);font-size:12px}
+.ts{flex:none;background:#1b2a3a;color:var(--teal);border-radius:6px;padding:1px 7px;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:1px}
+.cm .x{margin-left:auto;color:var(--dim);font-size:12px;padding:2px 6px}
+.cbox{display:flex;gap:8px;margin-top:8px;align-items:flex-end}
+.cbox textarea{flex:1;resize:none;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:42px;max-height:120px}
+.cbox .send{background:var(--amber);color:#04140a;border-radius:12px;padding:10px 14px;font-weight:600}
+.atbtn{font-size:12px;color:var(--mute);padding:6px 0 0;display:flex;align-items:center;gap:6px}
+.atbtn.on{color:var(--teal)}
+.atbtn i{width:14px;height:14px;border-radius:4px;border:1.5px solid currentColor;display:inline-grid;place-items:center;font-style:normal;font-size:10px}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom));background:var(--amber);color:#04140a;font-weight:600;padding:15px 24px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.5);display:flex;gap:8px;align-items:center;z-index:5;font-size:16px;white-space:nowrap}
+.fab svg{width:18px;height:18px}
+.sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10;display:none;align-items:flex-end;justify-content:center}
+.sheetbg.open{display:flex}
+.sheet{background:var(--panel);width:100%;max-width:640px;border-radius:22px 22px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;border-top:1px solid var(--line)}
+.sheet h2{font-family:Inter,system-ui,sans-serif;font-weight:800;font-size:22px;margin:0 0 14px}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pick label{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px 10px;text-align:center;font-weight:600;cursor:pointer}
+.pick label small{display:block;font-weight:400;color:var(--mute);font-size:12px;margin-top:3px}
+.pick label .ic{font-size:24px;display:block;margin-bottom:4px}
+.pick input{display:none}
+.chosen{margin-top:12px;background:var(--panel2);border-radius:12px;padding:10px 12px;font-size:14px;color:var(--amber2);display:none;word-break:break-all}
+.field{margin-top:14px}
+.field label{display:block;font-size:13px;color:var(--mute);margin-bottom:6px}
+.field input,.field textarea,.field select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:16px}
+.field textarea{resize:vertical;min-height:70px}
+.row{display:flex;gap:10px;margin-top:18px}
+.btn{flex:1;padding:14px;border-radius:14px;font-weight:600;background:var(--panel2);border:1px solid var(--line)}
+.btn.pri{background:var(--amber);border-color:var(--amber);color:#04140a}
+.btn:disabled{opacity:.45}
+.prog{margin-top:14px;display:none}
+.bar{height:6px;border-radius:3px;background:var(--panel2);overflow:hidden}
+.bar div{height:100%;background:var(--amber);width:0;transition:width .2s}
+.prog p{color:var(--mute);font-size:13px;margin:6px 0 0}
+.err{color:var(--rose);font-size:14px;margin-top:10px}
+.hint{color:var(--dim);font-size:12px;margin-top:10px}
+.toast{position:fixed;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--line);padding:10px 16px;border-radius:12px;z-index:20;font-size:14px;display:none;max-width:90vw}
+.dlg .row{margin-top:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.who-btn{color:var(--mute);font-size:13px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);margin-bottom:2px;max-width:45%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gate{max-width:420px;margin:12vh auto 0;padding:0 20px;text-align:center}
+.gate h1{margin-bottom:10px}
+.gate p{color:var(--mute);margin:0 0 20px}
+.gate input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px;font-size:16px;margin-bottom:12px;text-align:center}
+.gate .btn{width:100%}
+.recbox{margin-top:12px;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;display:none}
+.recdot{width:64px;height:64px;border-radius:50%;background:var(--rose);margin:0 auto 10px;display:grid;place-items:center;color:#fff}
+.recdot.live{animation:pulse 1.2s infinite}
+.recdot span{width:22px;height:22px;border-radius:5px;background:#fff;display:block}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,93,93,.6)}70%{box-shadow:0 0 0 16px rgba(255,93,93,0)}100%{box-shadow:0 0 0 0 rgba(255,93,93,0)}}
+.rectime{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums}
+.recbox audio{width:100%;margin-top:10px}
+.level{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:10px}
+.level div{height:100%;width:0;background:var(--amber);transition:width .08s}
+</style>
+</head>
+<body>
+<div id="gate" class="gate" style="display:none">
+  <h1>Le <span>Studio</span></h1>
+  <p id="gateMsg"></p>
+  <form id="gateForm">
+    <input id="gateIn" type="password" autocomplete="current-password">
+    <button class="btn pri" id="gateGo" type="submit">Entrer</button>
+  </form>
+  <div class="err" id="gateErr"></div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="wrap">
+    <header>
+      <h1>Le <span>Studio</span></h1>
+      <button class="who-btn" id="whoBtn"></button>
+    </header>
+    <div class="chips" id="chips"></div>
+    <div id="feed"><div class="status">Chargement…</div></div>
+  </div>
+  <button class="fab" id="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Ajouter un morceau</button>
+</div>
+
+<!-- Upload sheet -->
+<div class="sheetbg" id="upBg">
+  <div class="sheet">
+    <h2>Nouveau morceau</h2>
+    <div class="pick">
+      <label id="recBtn"><span class="ic">🎙️</span>Enregistrer<small>avec le micro</small></label>
+      <label><span class="ic">📁</span>Importer<small>un fichier audio</small><input type="file" id="fileIn" accept="audio/*,video/*,.m4a,.mp3,.wav,.aac,.ogg,.flac,.caf,.opus,.webm"></label>
+    </div>
+    <div class="recbox" id="recBox">
+      <div class="recdot" id="recDot"><span></span></div>
+      <div class="rectime" id="recTime">0:00</div>
+      <div class="level" id="recLevel"><div></div></div>
+      <audio id="recPrev" controls style="display:none"></audio>
+      <div class="row" style="margin-top:12px"><button class="btn" id="recAgain" style="display:none">Recommencer</button><button class="btn pri" id="recStop">Arrêter</button></div>
+    </div>
+    <div class="chosen" id="chosen"></div>
+    <div class="field"><label for="tTitle">Titre</label><input id="tTitle" placeholder="ex. Riff couplet v2" maxlength="80"></div>
+    <div class="field"><label for="tProj">Projet</label><select id="tProj"></select></div>
+    <div class="field"><label for="tNote">Un mot pour l'autre (optionnel)</label><textarea id="tNote" placeholder="ex. J'ai essayé en ré, dis-moi si ça colle avec ta basse" maxlength="1000"></textarea></div>
+    <div class="prog" id="prog"><div class="bar"><div id="barIn"></div></div><p id="progTxt"></p></div>
+    <div class="err" id="upErr"></div>
+    <div class="row"><button class="btn" id="upCancel">Annuler</button><button class="btn pri" id="upGo" disabled>Envoyer</button></div>
+    <div class="hint" id="upHint"></div>
+  </div>
+</div>
+
+<!-- Small dialog -->
+<div class="sheetbg" id="dlgBg">
+  <div class="sheet dlg">
+    <h2 id="dlgTitle"></h2>
+    <div id="dlgBody"></div>
+    <div class="row"><button class="btn" id="dlgNo">Annuler</button><button class="btn pri" id="dlgYes">OK</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+const fmt = s => { if (!isFinite(s) || s < 0) s = 0; s = Math.floor(s); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); };
+const ago = ms => {
+  if (!ms) return "";
+  const d = (Date.now() - ms) / 1000;
+  if (d < 60) return "à l'instant";
+  if (d < 3600) return "il y a " + Math.floor(d/60) + " min";
+  if (d < 86400) return "il y a " + Math.floor(d/3600) + " h";
+  if (d < 7*86400) { const n = Math.floor(d/86400); return n === 1 ? "hier" : "il y a " + n + " j"; }
+  return new Date(ms).toLocaleDateString("fr-FR", {day:"numeric", month:"short"});
+};
+function toast(msg){ const t = $("toast"); t.textContent = msg; t.style.display = "block"; clearTimeout(toast._t); toast._t = setTimeout(()=> t.style.display = "none", 3200); }
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+};
+
+// ---------- API ----------
+async function api(action, data, opts){
+  opts = opts || {};
+  const url = "api.php?a=" + action + (opts.query || "");
+  let body;
+  if (data) { body = new FormData(); for (const k in data) if (data[k] != null) body.append(k, data[k]); if (myName) body.append("author", myName); }
+  const r = await fetch(url, { method: data ? "POST" : "GET", body, headers: { "X-Studio": "1" }, credentials: "same-origin" });
+  let j = null; try { j = await r.json(); } catch(e){}
+  if (!r.ok) { const e = new Error((j && j.error) || ("Erreur " + r.status)); e.status = r.status; throw e; }
+  return j;
+}
+function uploadXhr(fd, onProgress){
+  return new Promise((res, rej) => {
+    const x = new XMLHttpRequest(); x.open("POST", "api.php?a=upload"); x.setRequestHeader("X-Studio", "1");
+    x.upload.onprogress = e => e.lengthComputable && onProgress(e.loaded / e.total);
+    x.onload = () => { let j = null; try { j = JSON.parse(x.responseText); } catch(e){} if (x.status >= 200 && x.status < 300) res(j); else rej(new Error((j && j.error) || ("Erreur " + x.status + (x.status === 413 ? " : fichier trop gros pour le serveur" : "")))); };
+    x.onerror = () => rej(new Error("Connexion perdue pendant l'envoi."));
+    x.send(fd);
+  });
+}
+
+// ---------- state ----------
+let myName = store.get("studio.name") || "";
+let projects = [], tracks = [], comments = [], rev = -1, maxUpload = 0, loaded = false;
+let filter = store.get("studio.filter") || "all";
+const expanded = new Set();
+const drafts = {}, atTime = {};
+const lastSeen = Number(store.get("studio.lastSeen") || 0);
+store.set("studio.lastSeen", String(Date.now()));
+
+const audio = new Audio(); audio.preload = "metadata";
+let curId = null;
+const PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
+const PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="5.5" y="4" width="4.5" height="16" rx="1"/><rect x="14" y="4" width="4.5" height="16" rx="1"/></svg>';
+
+// ---------- boot / gate ----------
+let gateMode = null;
+async function boot(){
+  let st;
+  try { st = await api("status"); } catch(e){ showGate("error", e.message); return; }
+  maxUpload = st.maxUpload || 0;
+  if (!st.setup) return showGate("setup");
+  if (!st.auth) return showGate("login");
+  if (!myName) return showGate("name");
+  startApp();
+}
+function showGate(mode, msg){
+  gateMode = mode; $("app").style.display = "none"; $("gate").style.display = "block"; $("gateErr").textContent = "";
+  const inp = $("gateIn"); inp.value = "";
+  if (mode === "setup") { $("gateMsg").textContent = "Premier lancement : choisis le mot de passe que vous partagerez tous les deux."; inp.type = "password"; inp.placeholder = "Mot de passe (6 caractères min.)"; inp.autocomplete = "new-password"; $("gateGo").textContent = "Créer le studio"; }
+  else if (mode === "login") { $("gateMsg").textContent = "Entre le mot de passe du studio."; inp.type = "password"; inp.placeholder = "Mot de passe"; inp.autocomplete = "current-password"; $("gateGo").textContent = "Entrer"; }
+  else if (mode === "name") { $("gateMsg").textContent = "Comment tu t'appelles ? C'est ce que l'autre verra sur tes morceaux."; inp.type = "text"; inp.placeholder = "Ton prénom"; inp.autocomplete = "given-name"; inp.value = myName; $("gateGo").textContent = "C'est parti"; }
+  else { $("gateMsg").textContent = msg || "Le serveur ne répond pas."; $("gateForm").style.display = "none"; return; }
+  $("gateForm").style.display = "block";
+  setTimeout(() => inp.focus(), 50);
+}
+$("gateForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const v = $("gateIn").value.trim(); if (!v) return;
+  $("gateGo").disabled = true; $("gateErr").textContent = "";
+  try {
+    if (gateMode === "setup") { await api("setup", { password: v }); }
+    else if (gateMode === "login") { await api("login", { password: v }); }
+    else if (gateMode === "name") { myName = v.slice(0, 30); store.set("studio.name", myName); }
+    $("gateGo").disabled = false;
+    if (!myName) return showGate("name");
+    startApp();
+  } catch(err){ $("gateGo").disabled = false; $("gateErr").textContent = err.message; }
+});
+
+let started = false;
+function startApp(){
+  $("gate").style.display = "none"; $("app").style.display = "block";
+  $("whoBtn").textContent = "👤 " + myName;
+  if (started) return; started = true;
+  refresh();
+  setInterval(() => { if (!document.hidden) refresh(); }, 8000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+}
+$("whoBtn").onclick = () => {
+  const wrap = el("div","field"); const inp = document.createElement("input"); inp.value = myName; inp.maxLength = 30; wrap.append(inp);
+  const out = el("button","btn","Se déconnecter"); out.style.marginTop = "12px"; out.style.width = "100%";
+  out.onclick = async () => { await api("logout", {}).catch(()=>{}); closeDlg(); showGate("login"); };
+  const box = el("div"); box.append(wrap, out);
+  openDlg("Ton nom", box, "Enregistrer", () => { const v = inp.value.trim(); if (!v) return false; myName = v; store.set("studio.name", v); $("whoBtn").textContent = "👤 " + v; render(); });
+};
+
+let refreshing = false;
+async function refresh(){
+  if (refreshing) return; refreshing = true;
+  try {
+    const s = await api("state", null, { query: "&since=" + rev });
+    if (!s.same) { projects = s.projects || []; tracks = (s.tracks || []).slice().sort((a,b) => b.createdAt - a.createdAt); comments = s.comments || []; rev = s.rev; loaded = true; render(); }
+  } catch(e){
+    if (e.status === 401) showGate("login");
+    else if (!loaded) { $("feed").innerHTML = ""; $("feed").append(el("div","status","Impossible de charger les morceaux. Vérifie ta connexion.")); }
+  } finally { refreshing = false; }
+}
+
+// ---------- render ----------
+const isMine = a => a && myName && a.toLowerCase() === myName.toLowerCase();
+const nameOf = a => isMine(a) ? "Toi" : (a || "Quelqu'un");
+
+function render(){
+  if (!loaded) return;
+  const ae = document.activeElement; let focusId = null, selS = 0, selE = 0;
+  if (ae && ae.dataset && ae.dataset.cbox) { focusId = ae.dataset.cbox; selS = ae.selectionStart; selE = ae.selectionEnd; }
+  renderChips();
+  if (filter !== "all" && !projects.some(p => p.id === filter)) filter = "all";
+  const list = tracks.filter(t => filter === "all" || t.projectId === filter);
+  const feed = $("feed"); feed.innerHTML = "";
+  if (!list.length) {
+    const e = el("div","empty"); e.append(el("b",null, tracks.length ? "Rien dans ce projet" : "Aucun morceau pour l'instant"));
+    e.append(document.createTextNode("Appuie sur « Ajouter un morceau » pour envoyer une idée."));
+    feed.append(e); return;
+  }
+  const byTrack = {};
+  comments.forEach(c => (byTrack[c.trackId] = byTrack[c.trackId] || []).push(c));
+  Object.values(byTrack).forEach(a => a.sort((x,y) => x.createdAt - y.createdAt));
+  list.forEach(t => feed.append(card(t, byTrack[t.id] || [])));
+  if (focusId) { const ta = feed.querySelector('[data-cbox="'+focusId+'"]'); if (ta) { ta.focus(); try { ta.setSelectionRange(selS, selE); } catch(e){} } }
+}
+
+function renderChips(){
+  const c = $("chips"); c.innerHTML = "";
+  const mk = (id, label) => {
+    const b = el("button","chip"+(filter===id?" on":""), label);
+    b.onclick = () => { filter = id; store.set("studio.filter", id); render(); };
+    if (id !== "all") { let tm; b.addEventListener("contextmenu", e => { e.preventDefault(); projectMenu(id); }); b.addEventListener("pointerdown", () => tm = setTimeout(() => projectMenu(id), 650)); ["pointerup","pointerleave","pointercancel"].forEach(ev => b.addEventListener(ev, () => clearTimeout(tm))); }
+    return b;
+  };
+  c.append(mk("all","Tous"));
+  projects.forEach(p => c.append(mk(p.id, p.name || "Sans nom")));
+  const a = el("button","chip add","＋ Projet"); a.onclick = newProject; c.append(a);
+}
+function projectMenu(id){
+  const p = projects.find(x => x.id === id); if (!p) return;
+  openDlg("Supprimer le projet « " + p.name + " » ?", el("p","hint","Les morceaux ne sont pas supprimés, ils sortent juste du projet."), "Supprimer", async () => {
+    try { await api("delete", { type: "project", id }); await refresh(); } catch(e){ toast(e.message); return false; }
+  });
+}
+
+function card(t, cms){
+  const d = el("div","card"+(curId===t.id?" playing":"")); d.dataset.id = t.id;
+  const top = el("div","top");
+  const pb = el("button","play"); pb.innerHTML = (curId===t.id && !audio.paused) ? PAUSE : PLAY; pb.setAttribute("aria-label","Lecture");
+  pb.onclick = () => togglePlay(t);
+  const meta = el("div","meta");
+  meta.append(el("div","title", t.title || "Sans titre"));
+  const by = el("div","by");
+  by.append(el("span",null, nameOf(t.author) + " · " + ago(t.createdAt)));
+  const p = projects.find(x => x.id === t.projectId); if (p) by.append(el("span","tag", p.name));
+  if (lastSeen && t.createdAt > lastSeen && !isMine(t.author)) by.append(el("span","new","Nouveau"));
+  meta.append(by);
+  top.append(pb, meta); d.append(top);
+  if (t.note) d.append(el("p","note", t.note));
+
+  const w = el("div","wave"); const cv = document.createElement("canvas"); w.append(cv);
+  const marks = el("div","marks");
+  cms.filter(c => typeof c.t === "number" && t.duration).forEach(c => { const m = el("div","mark"); m.style.left = Math.min(100, c.t / t.duration * 100) + "%"; marks.append(m); });
+  w.append(marks);
+  const dur = () => t.duration || (curId === t.id && isFinite(audio.duration) ? audio.duration : 0);
+  const pos = ev => { const r = cv.getBoundingClientRect(); return Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width)); };
+  w.addEventListener("pointerdown", ev => { playAt(t, pos(ev) * dur()); w.setPointerCapture(ev.pointerId); w._drag = true; });
+  w.addEventListener("pointermove", ev => { if (w._drag && curId === t.id && dur()) audio.currentTime = pos(ev) * dur(); });
+  w.addEventListener("pointerup", () => w._drag = false);
+  d.append(w);
+  const times = el("div","times"); const cur = el("span","cur", curId===t.id ? fmt(audio.currentTime) : "0:00");
+  times.append(cur, el("span",null, t.duration ? fmt(t.duration) : "")); d.append(times);
+  requestAnimationFrame(() => drawWave(cv, t.peaks || [], curId===t.id && dur() ? audio.currentTime / dur() : 0));
+
+  const f = el("div","foot");
+  const cb = el("button",null, "💬 " + (cms.length ? cms.length + " commentaire" + (cms.length>1?"s":"") : "Commenter"));
+  cb.onclick = () => { expanded.has(t.id) ? expanded.delete(t.id) : expanded.add(t.id); render(); };
+  f.append(cb, el("span","sp"));
+  if (isMine(t.author)) { const del = el("button",null,"Supprimer"); del.onclick = () => deleteTrack(t); f.append(del); }
+  d.append(f);
+  if (expanded.has(t.id)) d.append(commentsBlock(t, cms));
+  return d;
+}
+
+function commentsBlock(t, cms){
+  const box = el("div","comments");
+  if (!cms.length) { const r = el("div","cm"); r.append(el("span","when","Pas encore de commentaire.")); box.append(r); }
+  cms.forEach(c => {
+    const r = el("div","cm");
+    if (typeof c.t === "number") { const ts = el("button","ts", fmt(c.t)); ts.onclick = () => playAt(t, c.t); r.append(ts); }
+    const body = el("div"); const h = el("div"); h.append(el("span","who", nameOf(c.author)), document.createTextNode(" "), el("span","when", ago(c.createdAt)));
+    body.append(h, el("div","txt", c.text || "")); r.append(body);
+    if (isMine(c.author)) { const x = el("button","x","✕"); x.setAttribute("aria-label","Supprimer le commentaire"); x.onclick = () => askConfirm("Supprimer ce commentaire ?", async () => { try { await api("delete", { type: "comment", id: c.id }); await refresh(); } catch(e){ toast(e.message); return false; } }); r.append(x); }
+    box.append(r);
+  });
+  const row = el("div","cbox");
+  const ta = document.createElement("textarea"); ta.rows = 1; ta.placeholder = "Ton avis…"; ta.dataset.cbox = t.id; ta.maxLength = 1000;
+  ta.value = drafts[t.id] || "";
+  ta.oninput = () => { drafts[t.id] = ta.value; ta.style.height = "auto"; ta.style.height = Math.min(120, ta.scrollHeight) + "px"; };
+  const send = el("button","send","Envoyer");
+  const at = el("button","atbtn");
+  const updAt = () => { const on = atTime[t.id] != null; at.className = "atbtn" + (on ? " on" : ""); at.innerHTML = ""; at.append(el("i", null, on ? "✓" : ""), document.createTextNode(on ? "Au moment " + fmt(atTime[t.id]) : "Lier à un moment du morceau")); };
+  at.onclick = () => { if (atTime[t.id] != null) delete atTime[t.id]; else atTime[t.id] = curId === t.id ? audio.currentTime : 0; updAt(); };
+  updAt();
+  send.onclick = async () => {
+    const text = ta.value.trim(); if (!text) return;
+    send.disabled = true;
+    try { await api("comment", { trackId: t.id, text, t: atTime[t.id] != null ? atTime[t.id].toFixed(1) : null }); drafts[t.id] = ""; delete atTime[t.id]; await refresh(); }
+    catch(e){ send.disabled = false; toast(e.message); }
+  };
+  row.append(ta, send); box.append(row, at);
+  return box;
+}
+
+function drawWave(cv, peaks, prog){
+  const dpr = window.devicePixelRatio || 1; const w = cv.clientWidth, h = cv.clientHeight; if (!w) return;
+  cv.width = w * dpr; cv.height = h * dpr; const g = cv.getContext("2d"); g.scale(dpr, dpr);
+  const n = Math.max(1, Math.floor(w / 4)); const bw = 2.4;
+  for (let i = 0; i < n; i++) {
+    const v = peaks.length ? peaks[Math.floor(i / n * peaks.length)] || 0 : 0.3;
+    const bh = Math.max(2, v * (h - 4)); const x = i * (w / n);
+    g.fillStyle = (i / n) < prog ? "#34d17a" : "#3a3a3a";
+    g.beginPath(); if (g.roundRect) g.roundRect(x, (h - bh) / 2, bw, bh, 1.2); else g.rect(x, (h - bh)/2, bw, bh); g.fill();
+  }
+}
+
+// ---------- playback ----------
+function loadTrack(t){ if (curId === t.id) return; curId = t.id; audio.src = "api.php?a=audio&id=" + encodeURIComponent(t.id); }
+audio.addEventListener("error", () => { if (curId) toast("Ce format ne se lit pas sur cet appareil."); });
+async function togglePlay(t){
+  if (curId === t.id && !audio.paused) { audio.pause(); return; }
+  loadTrack(t); try { await audio.play(); } catch(e){}
+}
+async function playAt(t, sec){
+  loadTrack(t);
+  const go = () => { try { audio.currentTime = sec; } catch(e){} };
+  if (audio.readyState >= 1) go(); else audio.addEventListener("loadedmetadata", go, { once: true });
+  try { await audio.play(); } catch(e){}
+}
+["play","pause","ended"].forEach(ev => audio.addEventListener(ev, () => { document.querySelectorAll(".card").forEach(c => { const on = c.dataset.id === curId; c.classList.toggle("playing", on); const b = c.querySelector(".play"); if (b) b.innerHTML = on && !audio.paused ? PAUSE : PLAY; }); }));
+(function tick(){
+  if (curId) {
+    const c = document.querySelector('.card[data-id="'+curId+'"]'); const t = tracks.find(x => x.id === curId);
+    if (c && t) { const d = t.duration || audio.duration; drawWave(c.querySelector("canvas"), t.peaks || [], d ? audio.currentTime / d : 0); const cu = c.querySelector(".cur"); if (cu) cu.textContent = fmt(audio.currentTime); }
+  }
+  setTimeout(() => requestAnimationFrame(tick), 120);
+})();
+
+function deleteTrack(t){
+  askConfirm("Supprimer « " + (t.title || "Sans titre") + " » et ses commentaires ?", async () => {
+    try { if (curId === t.id) { audio.pause(); audio.removeAttribute("src"); curId = null; } await api("delete", { type: "track", id: t.id }); await refresh(); toast("Morceau supprimé"); }
+    catch(e){ toast(e.message); return false; }
+  });
+}
+
+// ---------- dialogs ----------
+let dlgYes = null;
+function openDlg(title, bodyEl, yesLabel, onYes){
+  $("dlgTitle").textContent = title; const b = $("dlgBody"); b.innerHTML = ""; if (bodyEl) b.append(bodyEl);
+  $("dlgYes").textContent = yesLabel || "OK"; dlgYes = onYes; $("dlgBg").classList.add("open");
+}
+function closeDlg(){ $("dlgBg").classList.remove("open"); dlgYes = null; }
+$("dlgNo").onclick = closeDlg;
+$("dlgBg").addEventListener("click", e => { if (e.target === $("dlgBg")) closeDlg(); });
+$("dlgYes").onclick = async () => { const f = dlgYes; if (!f) return; $("dlgYes").disabled = true; let r; try { r = await f(); } finally { $("dlgYes").disabled = false; } if (r !== false) closeDlg(); };
+function askConfirm(msg, fn){ openDlg(msg, null, "Supprimer", fn); }
+function newProject(){
+  const wrap = el("div","field"); const inp = document.createElement("input"); inp.placeholder = "ex. Chanson de l'été"; inp.maxLength = 50; wrap.append(inp);
+  openDlg("Nouveau projet", wrap, "Créer", async () => {
+    const name = inp.value.trim(); if (!name) { inp.focus(); return false; }
+    try { const p = await api("project", { name }); filter = p.id; store.set("studio.filter", p.id); await refresh(); }
+    catch(e){ toast(e.message); return false; }
+  });
+  setTimeout(() => inp.focus(), 50);
+}
+
+// ---------- recording ----------
+let rec = null, recStream = null, recChunks = [], recStart = 0, recTimer = null, recCtx = null, recAnalyser = null;
+function pickMime(){
+  const c = ["audio/mp4;codecs=mp4a.40.2", "audio/mp4", "audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus"];
+  if (!window.MediaRecorder) return null;
+  return c.find(m => { try { return MediaRecorder.isTypeSupported(m); } catch(e){ return false; } }) || "";
+}
+async function startRec(){
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || pickMime() === null) { $("upErr").textContent = "L'enregistrement n'est pas possible ici (il faut un site en https et un navigateur récent). Utilise « Importer »."; return; }
+  stopRec(true); clearChosen();
+  try { recStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }); }
+  catch(e){ $("upErr").textContent = "Accès au micro refusé. Autorise le micro pour ce site dans les réglages du navigateur."; return; }
+  const mime = pickMime();
+  try { rec = mime ? new MediaRecorder(recStream, { mimeType: mime, audioBitsPerSecond: 192000 }) : new MediaRecorder(recStream); }
+  catch(e){ rec = new MediaRecorder(recStream); }
+  recChunks = [];
+  rec.ondataavailable = e => e.data && e.data.size && recChunks.push(e.data);
+  rec.onstop = onRecStop;
+  rec.start(1000); recStart = Date.now();
+  $("recBox").style.display = "block"; $("recDot").classList.add("live"); $("recDot").style.display = "grid"; $("recLevel").style.display = "block";
+  $("recPrev").style.display = "none"; $("recAgain").style.display = "none"; $("recStop").style.display = "block"; $("recTime").textContent = "0:00";
+  try { recCtx = new (window.AudioContext || window.webkitAudioContext)(); recAnalyser = recCtx.createAnalyser(); recAnalyser.fftSize = 512; recCtx.createMediaStreamSource(recStream).connect(recAnalyser); } catch(e){ recAnalyser = null; }
+  const buf = new Uint8Array(512);
+  recTimer = setInterval(() => {
+    $("recTime").textContent = fmt((Date.now() - recStart) / 1000);
+    if (recAnalyser) { recAnalyser.getByteTimeDomainData(buf); let m = 0; for (const v of buf) m = Math.max(m, Math.abs(v - 128)); $("recLevel").firstChild.style.width = Math.min(100, m / 128 * 140) + "%"; }
+  }, 100);
+}
+function stopRec(silent){
+  clearInterval(recTimer); recTimer = null;
+  if (rec && rec.state !== "inactive") { if (silent) rec.onstop = null; rec.stop(); }
+  if (recStream) { recStream.getTracks().forEach(t => t.stop()); recStream = null; }
+  if (recCtx) { recCtx.close().catch(()=>{}); recCtx = null; }
+  $("recDot").classList.remove("live");
+}
+function onRecStop(){
+  const type = (rec && rec.mimeType) || (recChunks[0] && recChunks[0].type) || "audio/webm";
+  const ext = /mp4|aac/.test(type) ? "m4a" : /ogg/.test(type) ? "ogg" : "webm";
+  const blob = new Blob(recChunks, { type: type.split(";")[0] });
+  const d = new Date(); const name = "Enregistrement " + d.toLocaleDateString("fr-FR") + " " + d.toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
+  const file = new File([blob], "enregistrement." + ext, { type: blob.type });
+  const p = $("recPrev"); p.src = URL.createObjectURL(blob); p.style.display = "block";
+  $("recDot").style.display = "none"; $("recLevel").style.display = "none"; $("recStop").style.display = "none"; $("recAgain").style.display = "block";
+  setChosen(file, name, false);
+}
+$("recBtn").onclick = startRec;
+$("recStop").onclick = () => stopRec(false);
+$("recAgain").onclick = startRec;
+
+// ---------- upload ----------
+let chosenFile = null, busy = false;
+function clearChosen(){ chosenFile = null; $("chosen").style.display = "none"; $("upGo").disabled = true; }
+function setChosen(f, title, showBox){
+  chosenFile = f; $("upErr").textContent = "";
+  if (showBox) { const c = $("chosen"); c.style.display = "block"; c.textContent = "♪ " + f.name + " · " + (f.size/1048576).toFixed(1) + " Mo"; }
+  if (!$("tTitle").value) $("tTitle").value = title.slice(0, 80);
+  $("upGo").disabled = false;
+  if (maxUpload && f.size > maxUpload) { $("upErr").textContent = "Fichier trop gros pour le serveur (" + (f.size/1048576).toFixed(1) + " Mo, max " + Math.floor(maxUpload/1048576) + " Mo)."; $("upGo").disabled = true; }
+}
+function openUpload(){
+  clearChosen(); $("tTitle").value = ""; $("tNote").value = ""; $("upErr").textContent = ""; $("fileIn").value = "";
+  $("prog").style.display = "none"; $("recBox").style.display = "none"; $("recPrev").removeAttribute("src");
+  const s = $("tProj"); s.innerHTML = ""; const none = el("option", null, "— Aucun —"); none.value = ""; s.append(none);
+  projects.forEach(p => { const o = el("option", null, p.name); o.value = p.id; s.append(o); });
+  s.value = filter !== "all" ? filter : "";
+  $("upHint").textContent = maxUpload ? "Taille max par fichier : " + Math.floor(maxUpload/1048576) + " Mo. Le fichier est gardé tel quel, sans perte de qualité." : "";
+  $("upBg").classList.add("open");
+}
+function closeUpload(){ if (busy) return; stopRec(true); $("recBox").style.display = "none"; $("upBg").classList.remove("open"); }
+$("fab").onclick = openUpload;
+$("upCancel").onclick = closeUpload;
+$("upBg").addEventListener("click", e => { if (e.target === $("upBg")) closeUpload(); });
+$("fileIn").onchange = e => { const f = e.target.files && e.target.files[0]; if (!f) return; stopRec(true); $("recBox").style.display = "none"; setChosen(f, f.name.replace(/\.[^.]+$/, ""), true); };
+
+function setProg(p, txt){ $("prog").style.display = "block"; $("barIn").style.width = Math.round(p*100) + "%"; $("progTxt").textContent = txt; }
+async function analyse(file){
+  // durée + forme d'onde, calculées dans le navigateur (au mieux)
+  if (file.size > 150 * 1048576) return { duration: 0, peaks: [] };
+  const ab = await file.arrayBuffer();
+  const Ctx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const ctx = new Ctx(1, 1, 44100);
+  const buf = await new Promise((res, rej) => { try { const p = ctx.decodeAudioData(ab, res, rej); if (p && p.then) p.then(res, rej); } catch(e){ rej(e); } });
+  const bins = 200, out = new Array(bins).fill(0), chs = [];
+  for (let c = 0; c < buf.numberOfChannels; c++) chs.push(buf.getChannelData(c));
+  const len = buf.length, step = Math.max(1, Math.floor(len / bins / 64));
+  for (let b = 0; b < bins; b++) { const s = Math.floor(b*len/bins), e = Math.floor((b+1)*len/bins); let m = 0; for (let i = s; i < e; i += step) for (const ch of chs) { const v = Math.abs(ch[i]); if (v > m) m = v; } out[b] = m; }
+  const mx = Math.max(0.01, ...out);
+  return { duration: buf.duration, peaks: out.map(v => Math.round(Math.pow(v / mx, 0.8) * 100) / 100) };
+}
+$("upGo").onclick = async () => {
+  if (!chosenFile || busy) return;
+  busy = true; $("upGo").disabled = true; $("upCancel").disabled = true; $("upErr").textContent = "";
+  try {
+    setProg(0.03, "Préparation…");
+    let info = { duration: 0, peaks: [] };
+    try { info = await analyse(chosenFile); } catch(e){ console.warn("analyse", e); }
+    const fd = new FormData();
+    fd.append("file", chosenFile, chosenFile.name);
+    fd.append("title", $("tTitle").value.trim() || "Sans titre");
+    fd.append("note", $("tNote").value.trim());
+    fd.append("projectId", $("tProj").value);
+    fd.append("duration", String(info.duration || 0));
+    fd.append("peaks", JSON.stringify(info.peaks || []));
+    fd.append("author", myName);
+    await uploadXhr(fd, p => setProg(0.05 + p * 0.93, "Envoi… " + Math.round(p * 100) + " %"));
+    setProg(1, "Envoyé !");
+    busy = false; $("upCancel").disabled = false; closeUpload(); toast("Morceau envoyé ✓");
+    await refresh();
+  } catch(e){
+    $("upErr").textContent = e.message; $("prog").style.display = "none";
+    busy = false; $("upGo").disabled = false; $("upCancel").disabled = false;
+  }
+};
+
+boot();
+})();
+</script>
+</body>
+</html>
