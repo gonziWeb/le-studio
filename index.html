@@ -6,14 +6,14 @@
 <meta name="theme-color" content="#0b0b0b">
 <meta name="robots" content="noindex, nofollow">
 <title>Le Studio</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b0b0b'/%3E%3Cpath d='M7 18v-4M11 22V10M15 25V7M19 21v-10M23 18v-4' stroke='%2334d17a' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b0b0b'/%3E%3Cpath d='M7 18v-4M11 22V10M15 25V7M19 21v-10M23 18v-4' stroke='%23ff5c9a' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:dark;
   --bg:#0b0b0b; --panel:#171717; --panel2:#222222; --line:#2c2c2c;
   --ink:#f2f2f2; --mute:#a3a3a3; --dim:#6b6b6b;
-  --amber:#34d17a; --amber2:#7fe6ab; --rose:#ff5d5d; --teal:#8ec5ff;
+  --amber:#ff5c9a; --amber2:#ff9ec3; --rose:#ff7a45; --teal:#8ec5ff;
   --r:16px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -29,15 +29,15 @@ h1 span{color:var(--amber)}
 .chips{display:flex;gap:8px;overflow-x:auto;padding:14px 0 6px;scrollbar-width:none;margin:0 -16px;padding-left:16px;padding-right:16px}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:none;padding:8px 14px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--mute);font-weight:500;font-size:14px;white-space:nowrap}
-.chip.on{background:var(--amber);border-color:var(--amber);color:#04140a}
+.chip.on{background:var(--amber);border-color:var(--amber);color:#26070f}
 .chip.add{border-style:dashed}
 .status{color:var(--mute);text-align:center;padding:40px 10px}
 .empty{text-align:center;padding:48px 16px;color:var(--mute)}
 .empty b{display:block;font-family:Inter,system-ui,sans-serif;font-weight:800;font-size:22px;color:var(--ink);margin-bottom:6px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:12px 0;position:relative}
-.card.playing{border-color:#1f6b41;box-shadow:0 0 0 1px #1f6b41 inset}
+.card.playing{border-color:#6e2244;box-shadow:0 0 0 1px #6e2244 inset}
 .top{display:flex;gap:12px;align-items:center}
-.play{flex:none;width:48px;height:48px;border-radius:50%;background:var(--amber);color:#04140a;display:grid;place-items:center}
+.play{flex:none;width:48px;height:48px;border-radius:50%;background:var(--amber);color:#26070f;display:grid;place-items:center}
 .play svg{width:20px;height:20px}
 .meta{min-width:0;flex:1}
 .title{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -63,11 +63,11 @@ h1 span{color:var(--amber)}
 .cm .x{margin-left:auto;color:var(--dim);font-size:12px;padding:2px 6px}
 .cbox{display:flex;gap:8px;margin-top:8px;align-items:flex-end}
 .cbox textarea{flex:1;resize:none;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:42px;max-height:120px}
-.cbox .send{background:var(--amber);color:#04140a;border-radius:12px;padding:10px 14px;font-weight:600}
+.cbox .send{background:var(--amber);color:#26070f;border-radius:12px;padding:10px 14px;font-weight:600}
 .atbtn{font-size:12px;color:var(--mute);padding:6px 0 0;display:flex;align-items:center;gap:6px}
 .atbtn.on{color:var(--teal)}
 .atbtn i{width:14px;height:14px;border-radius:4px;border:1.5px solid currentColor;display:inline-grid;place-items:center;font-style:normal;font-size:10px}
-.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom));background:var(--amber);color:#04140a;font-weight:600;padding:15px 24px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.5);display:flex;gap:8px;align-items:center;z-index:5;font-size:16px;white-space:nowrap}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom));background:var(--amber);color:#26070f;font-weight:600;padding:15px 24px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.5);display:flex;gap:8px;align-items:center;z-index:5;font-size:16px;white-space:nowrap}
 .fab svg{width:18px;height:18px}
 .sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10;display:none;align-items:flex-end;justify-content:center}
 .sheetbg.open{display:flex}
@@ -76,7 +76,7 @@ h1 span{color:var(--amber)}
 .pick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pick label{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px 10px;text-align:center;font-weight:600;cursor:pointer}
 .pick label small{display:block;font-weight:400;color:var(--mute);font-size:12px;margin-top:3px}
-.pick label .ic{font-size:24px;display:block;margin-bottom:4px}
+.pick label .ic{width:24px;height:24px;display:block;margin:0 auto 6px;color:var(--amber)}
 .pick input{display:none}
 .chosen{margin-top:12px;background:var(--panel2);border-radius:12px;padding:10px 12px;font-size:14px;color:var(--amber2);display:none;word-break:break-all}
 .field{margin-top:14px}
@@ -85,7 +85,7 @@ h1 span{color:var(--amber)}
 .field textarea{resize:vertical;min-height:70px}
 .row{display:flex;gap:10px;margin-top:18px}
 .btn{flex:1;padding:14px;border-radius:14px;font-weight:600;background:var(--panel2);border:1px solid var(--line)}
-.btn.pri{background:var(--amber);border-color:var(--amber);color:#04140a}
+.btn.pri{background:var(--amber);border-color:var(--amber);color:#26070f}
 .btn:disabled{opacity:.45}
 .prog{margin-top:14px;display:none}
 .bar{height:6px;border-radius:3px;background:var(--panel2);overflow:hidden}
@@ -103,14 +103,29 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
 .gate input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px;font-size:16px;margin-bottom:12px;text-align:center}
 .gate .btn{width:100%}
 .recbox{margin-top:12px;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;display:none}
-.recdot{width:64px;height:64px;border-radius:50%;background:var(--rose);margin:0 auto 10px;display:grid;place-items:center;color:#fff}
+.recdot{width:64px;height:64px;border-radius:50%;background:var(--amber);margin:0 auto 10px;display:grid;place-items:center;color:#fff}
 .recdot.live{animation:pulse 1.2s infinite}
 .recdot span{width:22px;height:22px;border-radius:5px;background:#fff;display:block}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,93,93,.6)}70%{box-shadow:0 0 0 16px rgba(255,93,93,0)}100%{box-shadow:0 0 0 0 rgba(255,93,93,0)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,92,154,.6)}70%{box-shadow:0 0 0 16px rgba(255,92,154,0)}100%{box-shadow:0 0 0 0 rgba(255,92,154,0)}}
 .rectime{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums}
 .recbox audio{width:100%;margin-top:10px}
 .level{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:10px}
 .level div{height:100%;width:0;background:var(--amber);transition:width .08s}
+.player{position:fixed;left:0;right:0;bottom:0;z-index:6;background:#121212;border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:none;align-items:center;gap:12px}
+body.has-player .player{display:flex}
+body.has-player .fab{bottom:calc(80px + env(safe-area-inset-bottom));left:auto;right:16px;transform:none;padding:14px;border-radius:50%}
+body.has-player .fab span{display:none}
+body.has-player .fab svg{width:22px;height:22px}
+body.has-player{padding-bottom:calc(170px + env(safe-area-inset-bottom))}
+.pbtn{flex:none;width:42px;height:42px;border-radius:50%;background:var(--amber);color:#26070f;display:grid;place-items:center}
+.pbtn svg{width:18px;height:18px}
+.pmeta{flex:1;min-width:0}
+.ptitle{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptime{color:var(--mute);font-size:12px;font-variant-numeric:tabular-nums}
+.vol{flex:none;display:flex;align-items:center;gap:8px;color:var(--mute)}
+.vol svg{width:20px;height:20px}
+.vol input{width:110px;accent-color:var(--amber)}
+@media (min-width:700px){.player{padding-left:calc(50% - 320px);padding-right:calc(50% - 320px)}.vol input{width:160px}}
 </style>
 </head>
 <body>
@@ -133,7 +148,7 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
     <div class="chips" id="chips"></div>
     <div id="feed"><div class="status">Chargement…</div></div>
   </div>
-  <button class="fab" id="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Ajouter un morceau</button>
+  <button class="fab" id="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>Ajouter un morceau</span></button>
 </div>
 
 <!-- Upload sheet -->
@@ -141,8 +156,8 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
   <div class="sheet">
     <h2>Nouveau morceau</h2>
     <div class="pick">
-      <label id="recBtn"><span class="ic">🎙️</span>Enregistrer<small>avec le micro</small></label>
-      <label><span class="ic">📁</span>Importer<small>un fichier audio</small><input type="file" id="fileIn" accept="audio/*,video/*,.m4a,.mp3,.wav,.aac,.ogg,.flac,.caf,.opus,.webm"></label>
+      <label id="recBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Enregistrer</label>
+      <label><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7 9l5-5 5 5M5 20h14"/></svg>Importer<input type="file" id="fileIn" accept="audio/*,video/*,.m4a,.mp3,.wav,.aac,.ogg,.flac,.caf,.opus,.webm"></label>
     </div>
     <div class="recbox" id="recBox">
       <div class="recdot" id="recDot"><span></span></div>
@@ -152,9 +167,9 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
       <div class="row" style="margin-top:12px"><button class="btn" id="recAgain" style="display:none">Recommencer</button><button class="btn pri" id="recStop">Arrêter</button></div>
     </div>
     <div class="chosen" id="chosen"></div>
-    <div class="field"><label for="tTitle">Titre</label><input id="tTitle" placeholder="ex. Riff couplet v2" maxlength="80"></div>
+    <div class="field"><label for="tTitle">Titre</label><input id="tTitle" maxlength="80"></div>
     <div class="field"><label for="tProj">Projet</label><select id="tProj"></select></div>
-    <div class="field"><label for="tNote">Un mot pour l'autre (optionnel)</label><textarea id="tNote" placeholder="ex. J'ai essayé en ré, dis-moi si ça colle avec ta basse" maxlength="1000"></textarea></div>
+    <div class="field"><label for="tNote">Note</label><textarea id="tNote" maxlength="1000"></textarea></div>
     <div class="prog" id="prog"><div class="bar"><div id="barIn"></div></div><p id="progTxt"></p></div>
     <div class="err" id="upErr"></div>
     <div class="row"><button class="btn" id="upCancel">Annuler</button><button class="btn pri" id="upGo" disabled>Envoyer</button></div>
@@ -171,6 +186,11 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
   </div>
 </div>
 
+<div class="player" id="player">
+  <button class="pbtn" id="pPlay" aria-label="Lecture"></button>
+  <div class="pmeta"><div class="ptitle" id="pTitle"></div><div class="ptime" id="pTime"></div></div>
+  <div class="vol" id="volWrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg><input type="range" id="vol" min="0" max="1" step="0.01" aria-label="Volume"></div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -243,9 +263,9 @@ async function boot(){
 function showGate(mode, msg){
   gateMode = mode; $("app").style.display = "none"; $("gate").style.display = "block"; $("gateErr").textContent = "";
   const inp = $("gateIn"); inp.value = "";
-  if (mode === "setup") { $("gateMsg").textContent = "Premier lancement : choisis le mot de passe que vous partagerez tous les deux."; inp.type = "password"; inp.placeholder = "Mot de passe (6 caractères min.)"; inp.autocomplete = "new-password"; $("gateGo").textContent = "Créer le studio"; }
-  else if (mode === "login") { $("gateMsg").textContent = "Entre le mot de passe du studio."; inp.type = "password"; inp.placeholder = "Mot de passe"; inp.autocomplete = "current-password"; $("gateGo").textContent = "Entrer"; }
-  else if (mode === "name") { $("gateMsg").textContent = "Comment tu t'appelles ? C'est ce que l'autre verra sur tes morceaux."; inp.type = "text"; inp.placeholder = "Ton prénom"; inp.autocomplete = "given-name"; inp.value = myName; $("gateGo").textContent = "C'est parti"; }
+  if (mode === "setup") { $("gateMsg").textContent = "Choisissez un mot de passe commun (6 caractères minimum)."; inp.type = "password"; inp.placeholder = ""; inp.autocomplete = "new-password"; $("gateGo").textContent = "Valider"; }
+  else if (mode === "login") { $("gateMsg").textContent = "Mot de passe"; inp.type = "password"; inp.placeholder = ""; inp.autocomplete = "current-password"; $("gateGo").textContent = "Entrer"; }
+  else if (mode === "name") { $("gateMsg").textContent = "Ton prénom"; inp.type = "text"; inp.placeholder = ""; inp.autocomplete = "given-name"; inp.value = myName; $("gateGo").textContent = "Valider"; }
   else { $("gateMsg").textContent = msg || "Le serveur ne répond pas."; $("gateForm").style.display = "none"; return; }
   $("gateForm").style.display = "block";
   setTimeout(() => inp.focus(), 50);
@@ -267,7 +287,7 @@ $("gateForm").addEventListener("submit", async e => {
 let started = false;
 function startApp(){
   $("gate").style.display = "none"; $("app").style.display = "block";
-  $("whoBtn").textContent = "👤 " + myName;
+  $("whoBtn").textContent = myName;
   if (started) return; started = true;
   refresh();
   setInterval(() => { if (!document.hidden) refresh(); }, 8000);
@@ -278,7 +298,7 @@ $("whoBtn").onclick = () => {
   const out = el("button","btn","Se déconnecter"); out.style.marginTop = "12px"; out.style.width = "100%";
   out.onclick = async () => { await api("logout", {}).catch(()=>{}); closeDlg(); showGate("login"); };
   const box = el("div"); box.append(wrap, out);
-  openDlg("Ton nom", box, "Enregistrer", () => { const v = inp.value.trim(); if (!v) return false; myName = v; store.set("studio.name", v); $("whoBtn").textContent = "👤 " + v; render(); });
+  openDlg("Ton nom", box, "Enregistrer", () => { const v = inp.value.trim(); if (!v) return false; myName = v; store.set("studio.name", v); $("whoBtn").textContent = v; render(); });
 };
 
 let refreshing = false;
@@ -306,8 +326,7 @@ function render(){
   const list = tracks.filter(t => filter === "all" || t.projectId === filter);
   const feed = $("feed"); feed.innerHTML = "";
   if (!list.length) {
-    const e = el("div","empty"); e.append(el("b",null, tracks.length ? "Rien dans ce projet" : "Aucun morceau pour l'instant"));
-    e.append(document.createTextNode("Appuie sur « Ajouter un morceau » pour envoyer une idée."));
+    const e = el("div","empty"); e.append(el("b",null, tracks.length ? "Rien dans ce projet" : "Aucun morceau"));
     feed.append(e); return;
   }
   const byTrack = {};
@@ -331,7 +350,7 @@ function renderChips(){
 }
 function projectMenu(id){
   const p = projects.find(x => x.id === id); if (!p) return;
-  openDlg("Supprimer le projet « " + p.name + " » ?", el("p","hint","Les morceaux ne sont pas supprimés, ils sortent juste du projet."), "Supprimer", async () => {
+  openDlg("Supprimer le projet « " + p.name + " » ?", el("p","hint","Les morceaux restent, ils sont juste retirés du projet."), "Supprimer", async () => {
     try { await api("delete", { type: "project", id }); await refresh(); } catch(e){ toast(e.message); return false; }
   });
 }
@@ -366,7 +385,7 @@ function card(t, cms){
   requestAnimationFrame(() => drawWave(cv, t.peaks || [], curId===t.id && dur() ? audio.currentTime / dur() : 0));
 
   const f = el("div","foot");
-  const cb = el("button",null, "💬 " + (cms.length ? cms.length + " commentaire" + (cms.length>1?"s":"") : "Commenter"));
+  const cb = el("button",null, (cms.length ? cms.length + " commentaire" + (cms.length>1?"s":"") : "Commenter"));
   cb.onclick = () => { expanded.has(t.id) ? expanded.delete(t.id) : expanded.add(t.id); render(); };
   f.append(cb, el("span","sp"));
   if (isMine(t.author)) { const del = el("button",null,"Supprimer"); del.onclick = () => deleteTrack(t); f.append(del); }
@@ -377,7 +396,6 @@ function card(t, cms){
 
 function commentsBlock(t, cms){
   const box = el("div","comments");
-  if (!cms.length) { const r = el("div","cm"); r.append(el("span","when","Pas encore de commentaire.")); box.append(r); }
   cms.forEach(c => {
     const r = el("div","cm");
     if (typeof c.t === "number") { const ts = el("button","ts", fmt(c.t)); ts.onclick = () => playAt(t, c.t); r.append(ts); }
@@ -387,7 +405,7 @@ function commentsBlock(t, cms){
     box.append(r);
   });
   const row = el("div","cbox");
-  const ta = document.createElement("textarea"); ta.rows = 1; ta.placeholder = "Ton avis…"; ta.dataset.cbox = t.id; ta.maxLength = 1000;
+  const ta = document.createElement("textarea"); ta.rows = 1; ta.dataset.cbox = t.id; ta.maxLength = 1000;
   ta.value = drafts[t.id] || "";
   ta.oninput = () => { drafts[t.id] = ta.value; ta.style.height = "auto"; ta.style.height = Math.min(120, ta.scrollHeight) + "px"; };
   const send = el("button","send","Envoyer");
@@ -412,7 +430,7 @@ function drawWave(cv, peaks, prog){
   for (let i = 0; i < n; i++) {
     const v = peaks.length ? peaks[Math.floor(i / n * peaks.length)] || 0 : 0.3;
     const bh = Math.max(2, v * (h - 4)); const x = i * (w / n);
-    g.fillStyle = (i / n) < prog ? "#34d17a" : "#3a3a3a";
+    g.fillStyle = (i / n) < prog ? "#ff5c9a" : "#3a3a3a";
     g.beginPath(); if (g.roundRect) g.roundRect(x, (h - bh) / 2, bw, bh, 1.2); else g.rect(x, (h - bh)/2, bw, bh); g.fill();
   }
 }
@@ -430,18 +448,36 @@ async function playAt(t, sec){
   if (audio.readyState >= 1) go(); else audio.addEventListener("loadedmetadata", go, { once: true });
   try { await audio.play(); } catch(e){}
 }
+// volume (sur iPhone le volume se règle uniquement avec les boutons du téléphone)
+const canVol = (() => { try { const a = new Audio(); a.volume = 0.5; return Math.abs(a.volume - 0.5) < 0.01; } catch(e){ return false; } })();
+if (!canVol) $("volWrap").style.display = "none";
+audio.volume = Math.max(0, Math.min(1, parseFloat(store.get("studio.vol") || "1")));
+$("vol").value = audio.volume;
+$("vol").oninput = () => { audio.volume = parseFloat($("vol").value); store.set("studio.vol", String(audio.volume)); };
+$("pPlay").onclick = () => { if (!curId) return; if (audio.paused) audio.play().catch(()=>{}); else audio.pause(); };
+function updPlayer(){
+  const t = tracks.find(x => x.id === curId);
+  document.body.classList.toggle("has-player", !!t);
+  if (!t) return;
+  $("pPlay").innerHTML = audio.paused ? PLAY : PAUSE;
+  $("pTitle").textContent = t.title || "Sans titre";
+  const d = t.duration || audio.duration;
+  $("pTime").textContent = fmt(audio.currentTime) + (d ? " / " + fmt(d) : "") + " · " + nameOf(t.author);
+}
+["play","pause","ended","loadedmetadata"].forEach(ev => audio.addEventListener(ev, updPlayer));
 ["play","pause","ended"].forEach(ev => audio.addEventListener(ev, () => { document.querySelectorAll(".card").forEach(c => { const on = c.dataset.id === curId; c.classList.toggle("playing", on); const b = c.querySelector(".play"); if (b) b.innerHTML = on && !audio.paused ? PAUSE : PLAY; }); }));
 (function tick(){
   if (curId) {
     const c = document.querySelector('.card[data-id="'+curId+'"]'); const t = tracks.find(x => x.id === curId);
     if (c && t) { const d = t.duration || audio.duration; drawWave(c.querySelector("canvas"), t.peaks || [], d ? audio.currentTime / d : 0); const cu = c.querySelector(".cur"); if (cu) cu.textContent = fmt(audio.currentTime); }
+    if (!audio.paused) updPlayer();
   }
   setTimeout(() => requestAnimationFrame(tick), 120);
 })();
 
 function deleteTrack(t){
   askConfirm("Supprimer « " + (t.title || "Sans titre") + " » et ses commentaires ?", async () => {
-    try { if (curId === t.id) { audio.pause(); audio.removeAttribute("src"); curId = null; } await api("delete", { type: "track", id: t.id }); await refresh(); toast("Morceau supprimé"); }
+    try { if (curId === t.id) { audio.pause(); audio.removeAttribute("src"); curId = null; updPlayer(); } await api("delete", { type: "track", id: t.id }); await refresh(); toast("Morceau supprimé"); }
     catch(e){ toast(e.message); return false; }
   });
 }
@@ -458,7 +494,7 @@ $("dlgBg").addEventListener("click", e => { if (e.target === $("dlgBg")) closeDl
 $("dlgYes").onclick = async () => { const f = dlgYes; if (!f) return; $("dlgYes").disabled = true; let r; try { r = await f(); } finally { $("dlgYes").disabled = false; } if (r !== false) closeDlg(); };
 function askConfirm(msg, fn){ openDlg(msg, null, "Supprimer", fn); }
 function newProject(){
-  const wrap = el("div","field"); const inp = document.createElement("input"); inp.placeholder = "ex. Chanson de l'été"; inp.maxLength = 50; wrap.append(inp);
+  const wrap = el("div","field"); const inp = document.createElement("input"); inp.maxLength = 50; wrap.append(inp);
   openDlg("Nouveau projet", wrap, "Créer", async () => {
     const name = inp.value.trim(); if (!name) { inp.focus(); return false; }
     try { const p = await api("project", { name }); filter = p.id; store.set("studio.filter", p.id); await refresh(); }
@@ -521,7 +557,7 @@ let chosenFile = null, busy = false;
 function clearChosen(){ chosenFile = null; $("chosen").style.display = "none"; $("upGo").disabled = true; }
 function setChosen(f, title, showBox){
   chosenFile = f; $("upErr").textContent = "";
-  if (showBox) { const c = $("chosen"); c.style.display = "block"; c.textContent = "♪ " + f.name + " · " + (f.size/1048576).toFixed(1) + " Mo"; }
+  if (showBox) { const c = $("chosen"); c.style.display = "block"; c.textContent = f.name + " · " + (f.size/1048576).toFixed(1) + " Mo"; }
   if (!$("tTitle").value) $("tTitle").value = title.slice(0, 80);
   $("upGo").disabled = false;
   if (maxUpload && f.size > maxUpload) { $("upErr").textContent = "Fichier trop gros pour le serveur (" + (f.size/1048576).toFixed(1) + " Mo, max " + Math.floor(maxUpload/1048576) + " Mo)."; $("upGo").disabled = true; }
@@ -532,7 +568,7 @@ function openUpload(){
   const s = $("tProj"); s.innerHTML = ""; const none = el("option", null, "— Aucun —"); none.value = ""; s.append(none);
   projects.forEach(p => { const o = el("option", null, p.name); o.value = p.id; s.append(o); });
   s.value = filter !== "all" ? filter : "";
-  $("upHint").textContent = maxUpload ? "Taille max par fichier : " + Math.floor(maxUpload/1048576) + " Mo. Le fichier est gardé tel quel, sans perte de qualité." : "";
+  $("upHint").textContent = maxUpload ? "Max " + Math.floor(maxUpload/1048576) + " Mo par fichier." : "";
   $("upBg").classList.add("open");
 }
 function closeUpload(){ if (busy) return; stopRec(true); $("recBox").style.display = "none"; $("upBg").classList.remove("open"); }
@@ -573,7 +609,7 @@ $("upGo").onclick = async () => {
     fd.append("author", myName);
     await uploadXhr(fd, p => setProg(0.05 + p * 0.93, "Envoi… " + Math.round(p * 100) + " %"));
     setProg(1, "Envoyé !");
-    busy = false; $("upCancel").disabled = false; closeUpload(); toast("Morceau envoyé ✓");
+    busy = false; $("upCancel").disabled = false; closeUpload(); toast("Envoyé");
     await refresh();
   } catch(e){
     $("upErr").textContent = e.message; $("prog").style.display = "none";
