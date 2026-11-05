@@ -140,6 +140,13 @@ body.has-player{padding-bottom:calc(170px + env(safe-area-inset-bottom))}
 .drop{position:fixed;inset:0;z-index:30;background:rgba(11,11,11,.85);display:none;align-items:center;justify-content:center;pointer-events:none}
 .drop.on{display:flex}
 .drop div{border:2px dashed var(--amber);color:var(--amber);border-radius:22px;padding:48px 40px;font-size:20px;font-weight:600;margin:24px;text-align:center}
+.card.shelved{opacity:.6}
+.card.shelved:hover,.card.shelved.playing{opacity:1}
+.shelfby{color:var(--dim);font-size:12px;margin-top:8px}
+.shelfhead{display:flex;justify-content:space-between;align-items:center;width:100%;margin:28px 0 4px;padding:12px 2px;border-top:1px solid var(--line);color:var(--mute);font-weight:600;font-size:14px}
+.shelfhead .chev{font-weight:500;color:var(--dim);font-size:13px}
+.chk{cursor:pointer}
+.foot{flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -378,6 +385,8 @@ async function refresh(){
 const isMine = x => !!me && (x.authorId ? x.authorId === me.id : (x.author || "").toLowerCase() === me.name.toLowerCase());
 const canDel = x => isMine(x) || (me && me.admin);
 const nameOf = x => isMine(x) ? "Toi" : (x.author || "Quelqu'un");
+const projOf = t => Array.isArray(t.projectIds) ? t.projectIds : (t.projectId ? [t.projectId] : []);
+let showShelved = store.get("studio.shelf") === "1";
 
 function render(){
   if (!loaded) return;
@@ -385,7 +394,7 @@ function render(){
   if (ae && ae.dataset && ae.dataset.cbox) { focusId = ae.dataset.cbox; selS = ae.selectionStart; selE = ae.selectionEnd; }
   renderChips();
   if (filter !== "all" && !projects.some(p => p.id === filter)) filter = "all";
-  const list = tracks.filter(t => filter === "all" || t.projectId === filter);
+  const list = tracks.filter(t => filter === "all" || projOf(t).includes(filter));
   const feed = $("feed"); feed.innerHTML = "";
   if (!list.length) {
     const e = el("div","empty"); e.append(el("b",null, tracks.length ? "Rien dans ce projet" : "Aucun morceau"));
@@ -394,7 +403,15 @@ function render(){
   const byTrack = {};
   comments.forEach(c => (byTrack[c.trackId] = byTrack[c.trackId] || []).push(c));
   Object.values(byTrack).forEach(a => a.sort((x,y) => x.createdAt - y.createdAt));
-  list.forEach(t => feed.append(card(t, byTrack[t.id] || [])));
+  const active = list.filter(t => !t.shelved), shelved = list.filter(t => t.shelved);
+  active.forEach(t => feed.append(card(t, byTrack[t.id] || [])));
+  if (!active.length) feed.append(el("div","empty", "Tout est dans les morceaux pas retenus."));
+  if (shelved.length) {
+    const h = el("button","shelfhead"); h.append(el("span",null,"Pas retenus · " + shelved.length), el("span","chev", showShelved ? "Masquer" : "Afficher"));
+    h.onclick = () => { showShelved = !showShelved; store.set("studio.shelf", showShelved ? "1" : "0"); render(); };
+    feed.append(h);
+    if (showShelved) shelved.sort((a,b) => (b.shelvedAt||0) - (a.shelvedAt||0)).forEach(t => feed.append(card(t, byTrack[t.id] || [])));
+  }
   if (focusId) { const ta = feed.querySelector('[data-cbox="'+focusId+'"]'); if (ta) { ta.focus(); try { ta.setSelectionRange(selS, selE); } catch(e){} } }
 }
 
@@ -408,7 +425,7 @@ function renderChips(){
   };
   c.append(mk("all","Tous"));
   projects.forEach(p => c.append(mk(p.id, p.name || "Sans nom")));
-  const a = el("button","chip add","＋ Projet"); a.onclick = newProject; c.append(a);
+  const a = el("button","chip add","＋ Projet"); a.onclick = () => newProject(); c.append(a);
 }
 function projectMenu(id){
   const p = projects.find(x => x.id === id); if (!p || !canDel(p)) return;
@@ -418,7 +435,7 @@ function projectMenu(id){
 }
 
 function card(t, cms){
-  const d = el("div","card"+(curId===t.id?" playing":"")); d.dataset.id = t.id;
+  const d = el("div","card"+(curId===t.id?" playing":"")+(t.shelved?" shelved":"")); d.dataset.id = t.id;
   const top = el("div","top");
   const pb = el("button","play"); pb.innerHTML = (curId===t.id && !audio.paused) ? PAUSE : PLAY; pb.setAttribute("aria-label","Lecture");
   pb.onclick = () => togglePlay(t);
@@ -426,10 +443,11 @@ function card(t, cms){
   meta.append(el("div","title", t.title || "Sans titre"));
   const by = el("div","by");
   by.append(el("span",null, nameOf(t) + " · " + ago(t.createdAt)));
-  const p = projects.find(x => x.id === t.projectId); if (p) by.append(el("span","tag", p.name));
+  projOf(t).forEach(pid => { const p = projects.find(x => x.id === pid); if (p) by.append(el("span","tag", p.name)); });
   if (lastSeen && t.createdAt > lastSeen && !isMine(t)) by.append(el("span","new","Nouveau"));
   meta.append(by);
   top.append(pb, meta); d.append(top);
+  if (t.shelved && t.shelvedBy) d.append(el("div","shelfby", "Mis de côté par " + (me && t.shelvedBy.toLowerCase() === me.name.toLowerCase() ? "toi" : t.shelvedBy)));
   if (t.note) d.append(el("p","note", t.note));
 
   const w = el("div","wave"); const cv = document.createElement("canvas"); w.append(cv);
@@ -450,6 +468,10 @@ function card(t, cms){
   const cb = el("button",null, (cms.length ? cms.length + " commentaire" + (cms.length>1?"s":"") : "Commenter"));
   cb.onclick = () => { expanded.has(t.id) ? expanded.delete(t.id) : expanded.add(t.id); render(); };
   f.append(cb, el("span","sp"));
+  const pj = el("button",null,"Projet"); pj.onclick = () => pickProjects(t); f.append(pj);
+  const bof = el("button",null, t.shelved ? "Ressortir" : "Bof"); bof.title = t.shelved ? "Remettre dans la liste" : "Pas sûr qu'on l'utilise : le ranger en bas";
+  bof.onclick = async () => { bof.disabled = true; try { await api("track_update", { id: t.id, shelved: t.shelved ? "0" : "1" }); toast(t.shelved ? "Remis dans la liste" : "Rangé dans « Pas retenus »"); await refresh(); } catch(e){ bof.disabled = false; toast(e.message); } };
+  f.append(bof);
   if (canDel(t)) { const del = el("button",null,"Supprimer"); del.onclick = () => deleteTrack(t); f.append(del); }
   d.append(f);
   if (expanded.has(t.id)) d.append(commentsBlock(t, cms));
@@ -555,11 +577,23 @@ $("dlgNo").onclick = closeDlg;
 $("dlgBg").addEventListener("click", e => { if (e.target === $("dlgBg")) closeDlg(); });
 $("dlgYes").onclick = async () => { const f = dlgYes; if (!f) return; $("dlgYes").disabled = true; let r; try { r = await f(); } finally { $("dlgYes").disabled = false; } if (r !== false) closeDlg(); };
 function askConfirm(msg, fn){ openDlg(msg, null, "Supprimer", fn); }
-function newProject(){
+function pickProjects(t){
+  const cur = new Set(projOf(t)); const box = el("div");
+  if (!projects.length) box.append(el("p","hint","Aucun projet pour l'instant."));
+  const checks = projects.map(p => { const l = el("label","chk"); const c = document.createElement("input"); c.type = "checkbox"; c.checked = cur.has(p.id); c.value = p.id; l.append(c, document.createTextNode(p.name)); box.append(l); return c; });
+  const nw = el("button","btn","Nouveau projet"); nw.style.width = "100%"; nw.style.marginTop = "14px";
+  nw.onclick = () => newProject(async id => { try { await api("track_update", { id: t.id, projectIds: JSON.stringify([...projOf(t), id]) }); await refresh(); } catch(e){ toast(e.message); } });
+  box.append(nw);
+  openDlg("Projets de « " + (t.title || "Sans titre") + " »", box, "Enregistrer", async () => {
+    const ids = checks.filter(c => c.checked).map(c => c.value);
+    try { await api("track_update", { id: t.id, projectIds: JSON.stringify(ids) }); await refresh(); } catch(e){ toast(e.message); return false; }
+  });
+}
+function newProject(after){
   const wrap = el("div","field"); const inp = document.createElement("input"); inp.maxLength = 50; wrap.append(inp);
   openDlg("Nouveau projet", wrap, "Créer", async () => {
     const name = inp.value.trim(); if (!name) { inp.focus(); return false; }
-    try { const p = await api("project", { name }); filter = p.id; store.set("studio.filter", p.id); await refresh(); }
+    try { const p = await api("project", { name }); if (after) await after(p.id); else { filter = p.id; store.set("studio.filter", p.id); } await refresh(); }
     catch(e){ toast(e.message); return false; }
   });
   setTimeout(() => inp.focus(), 50);

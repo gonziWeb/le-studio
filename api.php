@@ -184,7 +184,8 @@ switch ($a) {
             'id' => $id,
             'title' => clean($_POST['title'] ?? '', MAX_TITLE) ?: 'Sans titre',
             'note' => clean($_POST['note'] ?? '', MAX_NOTE, true),
-            'projectId' => preg_match('/^[a-f0-9]{24}$/', $projectId) ? $projectId : null,
+            'projectIds' => preg_match('/^[a-f0-9]{24}$/', $projectId) ? [$projectId] : [],
+            'shelved' => false,
             'file' => $file,
             'mime' => $mime,
             'size' => (int)$f['size'],
@@ -207,6 +208,33 @@ switch ($a) {
         mutate(function (&$db) use ($c) { $db['comments'][] = $c; });
         out($c);
 
+    case 'track_update': // classer dans des projets, mettre de côté / ressortir (tout le monde peut)
+        requireAuth();
+        $id = (string)($_POST['id'] ?? '');
+        if (!preg_match('/^[a-f0-9]{24}$/', $id)) fail(400, 'Requête invalide');
+        $found = null;
+        mutate(function (&$db) use ($id, &$found) {
+            global $ME;
+            $valid = array_column($db['projects'], 'id');
+            foreach ($db['tracks'] as &$t) {
+                if ($t['id'] !== $id) continue;
+                if (isset($_POST['projectIds'])) {
+                    $ids = json_decode((string)$_POST['projectIds'], true);
+                    $t['projectIds'] = is_array($ids) ? array_values(array_intersect(array_unique(array_map('strval', $ids)), $valid)) : [];
+                    unset($t['projectId']);
+                }
+                if (isset($_POST['shelved'])) {
+                    $t['shelved'] = $_POST['shelved'] === '1';
+                    if ($t['shelved']) { $t['shelvedBy'] = $ME['name']; $t['shelvedAt'] = nowMs(); }
+                    else unset($t['shelvedBy'], $t['shelvedAt']);
+                }
+                $found = $t;
+            }
+            unset($t);
+        });
+        if (!$found) fail(404, 'Morceau introuvable');
+        out($found);
+
     case 'delete':
         requireAuth();
         $type = $_POST['type'] ?? '';
@@ -225,7 +253,7 @@ switch ($a) {
                 $db['comments'] = array_values(array_filter($db['comments'], function ($c) use ($id) { return $c['trackId'] !== $id; }));
             } else {
                 $db['projects'] = array_values(array_filter($db['projects'], function ($p) use ($id) { return $p['id'] !== $id; }));
-                foreach ($db['tracks'] as &$t) if ($t['projectId'] === $id) $t['projectId'] = null;
+                foreach ($db['tracks'] as &$t) { $t['projectIds'] = array_values(array_diff(trackProjects($t), [$id])); unset($t['projectId']); }
                 unset($t);
             }
         });
@@ -245,6 +273,7 @@ function fail($code, $msg) {
     echo json_encode(['error' => $msg], JSON_UNESCAPED_UNICODE);
     exit;
 }
+function trackProjects($t) { if (isset($t['projectIds']) && is_array($t['projectIds'])) return $t['projectIds']; return !empty($t['projectId']) ? [$t['projectId']] : []; }
 function nowMs() { return (int)round(microtime(true) * 1000); }
 function newId() { return bin2hex(random_bytes(12)); }
 function clean($s, $max, $multiline = false) {
